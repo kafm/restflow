@@ -154,12 +154,19 @@ public class RestflowVerticle extends MicroserviceVerticle {
 		ResourceController<?>  resourceHandler =  ResourceFactory.getControllerInstance(metadata);
 		methods.stream().forEach(method -> {
 			if(!method.isInternal()) {
-				RestflowRoute route = new RestflowRoute()
-						.basicUrl(getBaseUrl(resource.getName(), version))
-						.router(router)
-						.method(method);
-				deployMethodRoute(route, method, resourceHandler);	
-				deployMethodFilters(route);
+				if(StringUtils.isEmpty(method.getUrl())) {
+					if(logger.isWarnEnabled()) {
+						logger.warn("Public method ["+method.getName()+"] of resource ["+resource.getName()+
+										"] has no url defined and will not be published.");
+					}
+				} else {
+					RestflowRoute route = new RestflowRoute()
+							.basicUrl(getBaseUrl(resource.getName(), version))
+							.router(router)
+							.method(method);
+					deployMethodRoute(route, method, resourceHandler);	
+					deployMethodFilters(route);
+				}
 			}
 		});
 	}

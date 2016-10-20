@@ -27,7 +27,6 @@ public class ResourceMethod implements Serializable, Cloneable {
 	
 	private boolean wrap;
 
-	@XmlAttribute
 	private boolean internal;
 	
 	@XmlAttribute
