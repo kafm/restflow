@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sql-exceptions-mapping>
+	 <database>
+		<names>DB2*</names>
+		<errors>
+			<map>
+				<codes>-007 -029 -097 -10  -109 -115 -128 -199 -204 -206 -301 -408 -441 -491</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>-803 -407 -530 -531 -532 -543 -544 -545 -603 -667</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>
+	<database name="Derby">
+		<names>Apache Derby</names>
+		<errors>
+			<map>
+				<codes>42802 42821 42X01 42X02 42X03 42X04 42X05 42X06 42X07 42X08</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>23505 22001 22005 23502 23503 23513 X0Y32</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>H2</names>
+		<errors>
+			<map>
+				<codes>42000 42001 42101 42102 42111 42112 42121 42122 42132</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>23001 23505 22001 22003 22012 22018 22025 23000 23002 23003 23502 23503 23506 23507 23513</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>HSQL Database Engine</names>
+		<errors>
+			<map>
+				<codes>-22 -28</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>-104 -9</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>Informix Dynamic Server</names>
+		<errors>
+			<map>
+				<codes>-201 -217 -696</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>239 -268 -6017 -692 -11030</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>Microsoft SQL Server</names>
+		<errors>
+			<map>
+				<codes>156 170 207 208 209</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>2601 2627 544 8114 8115</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>MySQL</names>
+		<errors>
+			<map>
+				<codes>1054 1064 1146</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>1062 630 839 840 893 1169 1215 1216 1217 1364 1451 1452 1557</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>Oracle</names>
+		<errors>
+			<map>
+				<codes>900 903 904 917 936 942 17006 6550</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>1 1400 1722 2291 2292</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>PostgreSQL</names>
+		<errors>
+			<map>
+				<codes>03000 42000 42601 42602 42622 42804 42P01</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>23505 23000 23502 23503 23514</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>Sybase SQL Server,SQL Server,Adaptive Server Enterprise,ASE,sql server</names>
+		<errors>
+			<map>
+				<codes>101 102 103 104 105 106 107 108 109 110 111 112 113 116 120 121 123 207 208 213 257 512</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>2601 2615 2626 233 511 515 530 546 547 2615 2714</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	
+	<database>
+		<names>SAP,DB,HDB</names>
+		<errors>
+			<map>
+				<codes>257 259 260 261 262 263 264 267 268 269 270 271 272 273 275 276 277 278 278 279 280 281 282 283 284 285 286 288 289 290 294 295 296 297 299 308 309 313 315 316 318 319 320 321 322 323 324 328 329 330 333 335 336 337 338 340 343 350 351 352 362 368</codes>
+				<exception>com.platum.restflow.exceptions.RestflowInvalidRequestException</exception>
+				<message>Bad Sql provided in query.</message>	
+			</map>
+			<map>
+				<codes>301 461 462</codes>
+				<exception>com.platum.restflow.exceptions.RestflowDuplicatedRefException</exception>
+				<message>Object with the same id/key already exists.</message>	
+			</map>		
+		</errors>
+	</database>	 					
+</sql-exceptions-mapping>

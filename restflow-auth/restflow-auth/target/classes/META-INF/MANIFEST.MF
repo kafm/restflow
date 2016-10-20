@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Title: restflow-auth
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: kevinmartins
+Specification-Title: restflow-auth
+Implementation-Vendor-Id: com.platum.restflow
+Build-Jdk: 1.8.0_45
+Specification-Version: 0.0.1-SNAPSHOT
+Created-By: Maven Integration for Eclipse
+Main-Class: com.platum.restflow.AuthLauncher
+

@@ -1,0 +1,17 @@
+#Filter
+com.platum.restflow.components.Filter=\
+com.platum.restflow.auth.AuthFilterResolver
+
+#Controller
+com.platum.restflow.components.Controller=\
+com.platum.restflow.auth.AuthController
+
+#AuthManager
+com.platum.restflow.auth.AuthManager=\
+com.platum.restflow.auth.impl.JwtAuthManager
+
+#AuthFilter
+com.platum.restflow.auth.AuthFilter=\
+com.platum.restflow.auth.impl.JwtAuthFilter
+
+	
