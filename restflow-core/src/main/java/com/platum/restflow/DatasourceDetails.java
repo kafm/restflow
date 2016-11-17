@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.platum.restflow.resource.xml.DatasourcePropertiesAdapter;
+import com.platum.restflow.resource.xml.KeyValuePropertiesAdapter;
 
 @XmlRootElement(name = "datasource")
 @XmlAccessorType (XmlAccessType.FIELD)
@@ -21,7 +21,7 @@ public class DatasourceDetails {
 	@XmlAttribute(name = "class")
 	private String implClass;
 	
-	@XmlJavaTypeAdapter(DatasourcePropertiesAdapter.class)
+	@XmlJavaTypeAdapter(KeyValuePropertiesAdapter.class)
 	private Properties properties;
 
 	public String getName() {

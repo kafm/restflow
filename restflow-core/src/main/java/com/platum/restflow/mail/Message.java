@@ -11,6 +11,10 @@ public class Message {
 	
 	private List<String> cc;
 	
+	private List<String> bcc;
+	
+	private String subject;
+	
 	private String body;
 	
 	private boolean bodyIsHtml;
@@ -51,7 +55,33 @@ public class Message {
 		this.cc.add(cc);
 		return this;
 	}
+	
+	public List<String> bcc() {
+		return cc;
+	}
 
+	public Message bcc(List<String> bcc) {
+		this.bcc = bcc;
+		return this;
+	}
+	
+	public Message addBcc(String bcc) {
+		if(this.bcc == null) {
+			this.bcc = new ArrayList<>();
+		}
+		this.bcc.add(bcc);
+		return this;
+	}
+
+	public String subject() {
+		return subject;
+	}
+
+	public Message subject(String subject) {
+		this.subject = subject;
+		return this;
+	}
+	
 	public String body() {
 		return body;
 	}

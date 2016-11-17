@@ -1,12 +1,18 @@
 package com.platum.restflow.resource;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.reflect.FieldUtils;
+
 import com.google.common.collect.Maps;
 import com.platum.restflow.DatasourceDetails;
+import com.platum.restflow.FileSystemDetails;
 import com.platum.restflow.Restflow;
 import com.platum.restflow.RestflowEnvironment;
 import com.platum.restflow.exceptions.RestflowException;
@@ -49,6 +55,53 @@ public class ResourceMetadata<T> {
 		this.resourceClass = resourceClass;
 		queryBuilderClass = ResourceFactory.getQueryBuilderClass(this);
 	}
+	
+	public T setObjectId(T object, Object id) {
+		if(id != null) {
+			Validate.notNull(resource, "Service without resource.");
+			ResourceProperty idProperty = resource.getIdPropertyAsObject();
+			if(idProperty != null) {
+				if(object instanceof ResourceObject) {
+					((ResourceObject) object).setIdProperty(idProperty)
+											 .setId(id);
+				} else {
+					try {
+						Field idField = FieldUtils.getField(idClass(), 
+											idProperty.getName(), true);
+						FieldUtils.writeField(idField, object, id, true);	
+					} catch(Throwable e) {
+						throw new RestflowException("Cannot set id field.", e);
+					}
+				}	
+			}		
+		}
+		return object;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <I> I getObjectId(T object) {
+		Validate.notNull(resource, "Service without resource.");
+		ResourceProperty idProperty = resource.getIdPropertyAsObject();
+		I id = null;
+		if(idProperty != null) {
+			if(object instanceof ResourceObject) {
+				ResourceObject rObj = (ResourceObject) object;
+				if(StringUtils.isEmpty(rObj.getIdProperty())) {
+					rObj.setIdProperty(idProperty);
+				}
+				return rObj.getId();
+			} else {
+				try {
+					Field idField = FieldUtils.getField(idClass(), 
+										idProperty.getName(), true);
+					return (I) FieldUtils.readField(idField, object);
+				} catch(Throwable e) {
+					throw new RestflowException("Cannot set id field.", e);
+				}
+			}	
+		}
+		return id;
+	}
 
 	public Restflow restflow() {
 		return restflow;
@@ -64,6 +117,10 @@ public class ResourceMetadata<T> {
 	
 	public DatasourceDetails datasource() {
 		return restflow.getDatasource(resource.getDatasource());
+	}
+	
+	public FileSystemDetails fileSystem() {
+		return restflow.getFileSystem(resource.getFileSystem());
 	}
 	
 	public <I> Class<I> idClass() {

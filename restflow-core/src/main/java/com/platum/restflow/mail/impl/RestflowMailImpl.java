@@ -1,7 +1,13 @@
 package com.platum.restflow.mail.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Properties;
+
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,20 +21,13 @@ import com.platum.restflow.mail.RestflowMail;
 import com.platum.restflow.utils.promise.Promise;
 import com.platum.restflow.utils.promise.PromiseFactory;
 
-import io.vertx.core.buffer.Buffer;
-import io.vertx.ext.mail.MailAttachment;
-import io.vertx.ext.mail.MailClient;
-import io.vertx.ext.mail.MailConfig;
-import io.vertx.ext.mail.MailMessage;
-import io.vertx.ext.mail.StartTLSOptions;
-
 public class RestflowMailImpl implements RestflowMail {
 	
 	private final  Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private Restflow restflow;
 
-	private MailClient mailClient;
+	private Session session;
 	
 	private String from;
 	
@@ -42,22 +41,33 @@ public class RestflowMailImpl implements RestflowMail {
 		if(env != null) {
 			String host = env.getProperty(MAIL_HOST_PROPERTY);
 			String port = env.getProperty(MAIL_PORT_PROPERTY);
-			String tls = env.getProperty(MAIL_TLS_PROPERTY);
+			Boolean tls = BooleanUtils.toBooleanObject(env.getProperty(MAIL_TLS_PROPERTY));
 			from = env.getProperty(MAIL_USERNAME_PROPERTY);
 			String password = env.getProperty(MAIL_PASSWORD_PROPERTY);
 			if(StringUtils.isNotEmpty(host)) {
 				try {
-					MailConfig config = new MailConfig();
-					config.setHostname(host);
+					Properties props = new Properties();
+					props.put("mail.smtp.starttls.enable", tls.toString());
+					props.put("mail.smtp.host", host);
 					if(StringUtils.isNotEmpty(port)) {
-						config.setPort(Integer.parseInt(port));
+						props.put("mail.smtp.port", port);				
 					}
-					if(StringUtils.isNotEmpty(tls) && BooleanUtils.toBoolean(tls)) {
-						config.setStarttls(StartTLSOptions.REQUIRED);
+					if(StringUtils.isNotEmpty(password)) {
+						props.put("mail.smtp.auth", "true");
+						session = Session.getInstance(props,
+								  new javax.mail.Authenticator() 
+								  {
+									protected PasswordAuthentication getPasswordAuthentication() 
+									{
+										return new PasswordAuthentication(from, password);
+									}
+								 });
+					} else {
+						session = Session.getInstance(props);
+					}	
+					if(logger.isInfoEnabled()) {
+						logger.info("Mail service started with host "+host+":"+port+", tls:"+tls+" and user "+from);
 					}
-					config.setUsername(from);
-					config.setPassword(password);
-					mailClient = MailClient.createNonShared(restflow.vertx(), config);					
 				} catch(Throwable e) {
 					if(logger.isDebugEnabled()) {
 						logger.debug("Error when start email service.", e);
@@ -70,37 +80,59 @@ public class RestflowMailImpl implements RestflowMail {
 	}
 
 	@Override
-	public Promise<String> sendEmail(Message email) {
-		MailMessage message = new MailMessage()
-								.setFrom(StringUtils.isEmpty(email.from()) ? from : email.from())
-								.setTo(email.to())
-								.setCc(email.cc());
-		Promise<String> promise = PromiseFactory.getPromiseInstance();
-		if(email.bodyIsHtml()) {
-			message.setHtml(email.body());
-		} else {
-			message.setText(email.body());
-		}
-		if(email.hasAttachments()) {
-			List<MailAttachment> mailAttachs =  new ArrayList<>();
-			email.attachments().stream().forEach(attach -> {
-				mailAttachs.add(new MailAttachment()
-									.setContentId(attach.contentId())
-									.setContentType(attach.contentType())
-									.setDisposition(attach.disposition())
-									.setDescription(attach.description())
-									.setData(Buffer.buffer(attach.data())));
-			});
-			message.setAttachment(mailAttachs);
-		}
-		mailClient.sendMail(message, handler -> {
-			if(handler.succeeded()) {
-				promise.resolve(handler.result().getMessageID());
+	public Promise<Void> sendEmail(Message email) {
+		Promise<Void> promise = PromiseFactory.getPromiseInstance();
+		restflow.vertx().executeBlocking(future -> {
+			try {
+				MimeMessage message = new MimeMessage(session);
+				message.setFrom(new InternetAddress(from));
+		        if(StringUtils.isNotEmpty(email.to()))
+		        {
+		        	String[] tos = email.to().split(",");
+		        	for(String to : tos) {
+		        		message.addRecipient(javax.mail.Message.RecipientType.TO, 
+		        								new InternetAddress(to));
+		        	}		        	 	
+		        }
+		        if(email.cc() != null && !email.cc().isEmpty())
+		        {
+		        	for(String cc : email.cc()) {
+		        		message.addRecipient(javax.mail.Message.RecipientType.CC, 
+		        								new InternetAddress(cc));
+		        	}		        	 	
+		        }
+		        if(email.bcc() != null && !email.bcc().isEmpty())
+		        {
+		        	for(String bcc : email.bcc()) {
+		        		message.addRecipient(javax.mail.Message.RecipientType.BCC, 
+		        								new InternetAddress(bcc));
+		        	}		        	 	
+		        }
+				message.setSubject(email.subject());
+				if(email.bodyIsHtml()) {
+					message.setContent(email.body(), "text/html; charset=\"ISO-8859-1\"");
+				} else {
+					message.setContent(email.body(), "text/plain");
+				}
+				resolveTransport().sendMessage(message, message.getAllRecipients());
+				future.complete();
+			} catch(Throwable e) {
+				future.fail(e);
+			}
+		}, res -> {
+			if(res.succeeded()) {
+				promise.resolve();
 			} else {
-				promise.reject(handler.cause());
+				promise.reject(res.cause());
 			}
 		});
 		return promise;
 	}
 
+	private Transport resolveTransport() throws MessagingException {
+		Transport transport = session.getTransport("smtp");
+		if (!transport.isConnected())
+		    transport.connect();
+		return transport;
+	}
 }

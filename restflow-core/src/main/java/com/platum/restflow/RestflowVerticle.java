@@ -11,14 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Table;
-import com.platum.restflow.components.Filter;
-import com.platum.restflow.components.Controller;
 import com.platum.restflow.components.ComponentFactory;
+import com.platum.restflow.components.Controller;
+import com.platum.restflow.resource.DownloadMethod;
 import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceController;
 import com.platum.restflow.resource.ResourceFactory;
 import com.platum.restflow.resource.ResourceMetadata;
 import com.platum.restflow.resource.ResourceMethod;
+import com.platum.restflow.resource.UploadMethod;
 import com.platum.restflow.resource.query.QueryBuilder;
 
 import io.vertx.core.http.HttpMethod;
@@ -26,6 +27,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
+//TODO assert resource fs when deploying download
 public class RestflowVerticle extends MicroserviceVerticle {
 	
 	private static final List<RestflowHttpMethod> standardHttpMethods = Arrays.asList(
@@ -33,8 +35,6 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			RestflowHttpMethod.POST, RestflowHttpMethod.PUT_WITH_ID,
 			RestflowHttpMethod.DELETE_WITH_ID
 	);
-	
-	private static final List<Filter> filters = ComponentFactory.getFilterServices();
 	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
@@ -46,13 +46,14 @@ public class RestflowVerticle extends MicroserviceVerticle {
 	
 	private String baseUrl;
 	
+	private Router router;
+	
 	public RestflowVerticle(Restflow restflow) {
 		this.restflow = restflow;
 	}
 	
 	@Override
 	public void start() {
-		logger.info("config: ",config().fieldNames());
 		vertx.createHttpServer(RestflowVertxStarter.getHttpOptions(restflow.getEnvironment()))
 			  .requestHandler(resolveRouter()::accept)
 			  .listen(
@@ -89,7 +90,7 @@ public class RestflowVerticle extends MicroserviceVerticle {
 	}
 	
 	protected Router resolveRouter() {
-		Router router = Router.router(vertx);
+		router = Router.router(vertx);
 		Table<String, String, Resource> resources = restflow.getAllResources();
 		if(!resources.isEmpty()) {
 			router.route().handler(CorsHandler.create("*")
@@ -102,9 +103,12 @@ public class RestflowVerticle extends MicroserviceVerticle {
 				      .allowedHeader("Access-Control-Allow-Method")
 				      .allowedHeader("Access-Control-Allow-Origin")
 				      .allowedHeader("Access-Control-Allow-Credentials")
+				      .allowedHeader("Access-Control-Allow-Headers")
+				      .allowedHeader("X-Requested-With")
+				      .allowedHeader("Content-Type")
 				      .allowedHeader("Accept")
-				      .allowedHeader("Authorization")
-				      .allowedHeader("Content-Type"));
+				      .allowedHeader("enctype")
+				      .allowedHeader("Authorization"));
 			Set<String> resourceRowNames = resources.rowKeySet();
 			resourceRowNames.stream().forEach(resourceName -> {
 				Set<Entry<String, Resource>> versions = resources.row(resourceName).entrySet();
@@ -137,7 +141,7 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			logger.info("No controller services found.");
 		}
 	}
-	
+		
 	protected void deployResourceRoutes(Router router, Resource resource, String version) {
 		if(resource.isInternal()) {
 			return;
@@ -165,24 +169,29 @@ public class RestflowVerticle extends MicroserviceVerticle {
 							.router(router)
 							.method(method);
 					deployMethodRoute(route, method, resourceHandler);	
-					deployMethodFilters(route);
 				}
 			}
 		});
-	}
-	
-	protected void deployMethodFilters(RestflowRoute route) {
-		if(filters != null && !filters.isEmpty()) {
-			filters.stream().forEach(filter -> {
-				route.getRoute().handler(rountingContext -> {
-					filter.filter(route.method(), rountingContext);	
-				});
-			});
-		} else if(logger.isInfoEnabled()) {
-			logger.info("No filter services found.");
+		DownloadMethod download = resource.getDownload();
+		if(download != null && download.isActive()) {
+			RestflowRoute route = new RestflowRoute()
+					.basicUrl(getBaseUrl(resource.getName(), version))
+					.router(router)
+					.download(download);
+			resourceHandler.download(route, download);
+			route.deploy();
+		}
+		UploadMethod upload = resource.getUpload();
+		if(upload != null && upload.isActive()) {
+			RestflowRoute route = new RestflowRoute()
+					.basicUrl(getBaseUrl(resource.getName(), version))
+					.router(router)
+					.upload(upload);
+			resourceHandler.upload(route, upload);
+			route.deploy();		
 		}
 	}
-	
+		
 	protected List<ResourceMethod> generateResourceMethods(ResourceMetadata<?> metadata) {
 		final List<ResourceMethod> methods = metadata.resource().getMethods() == null
 											 ? new ArrayList<>() 
@@ -232,7 +241,7 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			logger.info("Method url empty?"+methodUrl);
 		}
 	}
-	
+
 	protected String getBaseUrl(String resource, String version) {
 		StringBuilder urlBuilder = new StringBuilder();
 		if(StringUtils.isNotEmpty(baseUrl)) {

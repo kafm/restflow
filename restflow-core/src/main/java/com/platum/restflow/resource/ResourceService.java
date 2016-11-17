@@ -45,9 +45,9 @@ public interface ResourceService<T> extends ResourceComponent<T> {
 	
 	Promise<T> update(ResourceMethod method, T object, Params params);
 	
-	Promise<T> parcialUpdate(ResourceMethod method, T object);
+	Promise<T> partialUpdate(ResourceMethod method, T object);
 	
-	Promise<T> parcialUpdate(ResourceMethod method, T object, Params params);
+	Promise<T> partialUpdate(ResourceMethod method, T object, Params params);
 			
 	<I> Promise<Void> delete(I id);
 	

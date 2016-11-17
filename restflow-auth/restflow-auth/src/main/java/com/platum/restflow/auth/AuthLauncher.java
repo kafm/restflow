@@ -6,8 +6,5 @@ public class AuthLauncher {
 
 	public static void main(String[] args) {
 		new RestflowLauncher().launch(args);
-		
-	
-		
 	}
 }

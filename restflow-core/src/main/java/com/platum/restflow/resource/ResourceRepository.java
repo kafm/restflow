@@ -20,6 +20,8 @@ public interface ResourceRepository<T> extends ResourceComponent<T> {
 		
 	void delete(ResourceMethod method, T object);
 	
+	void delete(ResourceMethod method, Params params);
+	
 	void batchUpdate(ResourceMethod method, List<T> objects);
 	
 	<E> RepositoryTransaction<E> newTransaction();

@@ -246,16 +246,18 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	}
 	
 	@Override
-	public Promise<T> parcialUpdate(ResourceMethod method, T object) {
-		return parcialUpdate(method, object, null);
+	public Promise<T> partialUpdate(ResourceMethod method, T object) {
+		return partialUpdate(method, object, null);
 	}
 	
 	@Override
-	public Promise<T> parcialUpdate(ResourceMethod method, T object, Params params) {
+	public Promise<T> partialUpdate(ResourceMethod method, T object, Params params) {
 		assertValidMethod(method);
 		return save(method, new ObjectContextImpl<T>(
 			 	metadata.resource(), this, object, params)
-				.isNew(false), true);
+				.contextMethod(method)
+				.isNew(false)
+				.partial(true), true);
 	}
 
 	@Override
@@ -267,7 +269,9 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				 .generateDeleteIfNotFound()
 				 .method();
 		get(id).success(object -> {
-			promise.wrap(delete(method, object));
+			delete(method, object)
+			.success(v -> {promise.resolve();})
+			.error(error -> {promise.reject(error);});
 		}).error(error -> {promise.reject(error);});
 		return promise;
 	}
@@ -276,9 +280,19 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	public Promise<Void> delete(ResourceMethod method, Params params) {
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
 		assertValidMethod(method);
-		delete(method, params)
-		.success(result -> {promise.resolve();})
-		.error(error -> {promise.reject(error);});
+		vertx.executeBlocking(future -> {
+			if(transaction != null) {
+				repository.withTransaction(transaction);
+			}
+			repository.delete(method, params);
+			future.complete();
+		}, result -> {
+			if(result.succeeded()) {
+				promise.resolve();
+			} else {
+				promise.reject(result.cause());
+			}
+		});		
 		return promise;
 	}
 
@@ -354,17 +368,19 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
 		vertx.executeBlocking(future -> {
 			T object = objContext.object();
-			ResourcePropertyValidator.validate(metadata.resource().getProperties(), 
-					object, metadata.resourceClass());
 			HookInterceptor hook = getHook(HookType.DESTROY, object);
 			if(hook == null) {
 				repository.delete(method, object);
+				future.complete();
 			} else {
 				boolean selfTransaction = this.transaction == null;
 				final RepositoryTransaction<?> transaction
 						= hook.transactional() && repository.hasTransationSupport()
-						? this.transaction != null? this.transaction : repository.newTransaction() 
+						? this.transaction != null ? this.transaction : repository.newTransaction() 
 						: null;
+				if(transaction != null) {
+						repository.withTransaction(transaction);
+				}
 				hookContext = true;
 				hook.invoke(objContext)
 				.allways(res -> {
@@ -376,7 +392,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 						if(transaction != null && selfTransaction) {
 							transaction.commit();
 						}
-						future.complete(object);
+						future.complete();
 					} else {
 						if(transaction != null && selfTransaction) {
 							transaction.rollback();
@@ -400,13 +416,13 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Promise<T> save(ResourceMethod method, ObjectContext<T> objContext, boolean nonNullOnly) {
+	private Promise<T> save(ResourceMethod method, ObjectContext<T> objContext, boolean partial) {
 		Promise<T> promise = PromiseFactory.getPromiseInstance();
 		final boolean isNew = objContext.isNew();
 		vertx.executeBlocking(future -> {
 			final T object = objContext.object();
 			ResourcePropertyValidator.validate(metadata.resource().getProperties(), 
-					object, metadata.resourceClass(), nonNullOnly);
+					object, metadata.resourceClass(), partial);
 			HookInterceptor hook = getHook(HookType.SAVE, object);
 			if(hook == null) {
 				T resObj = save(method, object, isNew);

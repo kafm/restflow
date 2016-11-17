@@ -1,5 +1,8 @@
 package com.platum.restflow.auth;
 
+import java.io.File;
+import java.util.UUID;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +16,16 @@ import com.platum.restflow.exceptions.ResflowObjectConversionException;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.exceptions.RestflowInvalidRequestException;
 import com.platum.restflow.resource.Resource;
+import com.platum.restflow.resource.ResourceFactory;
+import com.platum.restflow.resource.ResourceFile;
+import com.platum.restflow.resource.ResourceFileSystem;
 import com.platum.restflow.resource.ResourceMethod;
 import com.platum.restflow.resource.ResourceObject;
+import com.platum.restflow.resource.UploadMethod;
 import com.platum.restflow.utils.promise.PromiseHandler;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -35,7 +43,11 @@ public class AuthController implements Controller {
 	
 	public static final String CHANGE_PASSWORD_METHOD = "changePassword";
 	
+	public static final String CHANGE_USER_INFO_METHOD = "changeUserInfo";
+	
 	public static final String USER_INFO_METHOD = "userInfo";
+	
+	public static final String CHANGE_AVATAR_URL = "POST /avatar/upload";
 	
 	public static final String REVOKE_METHOD = "revoke";
 	
@@ -45,7 +57,13 @@ public class AuthController implements Controller {
 	
 	private AuthManager manager;
 	
+	private Restflow restflow;
+	
 	private Resource authResource;
+	
+	private ResourceFileSystem fileSystem;
+	
+	private String tmpPath;
 	
 	public AuthController() {
 		manager = AuthFactory.getAuthManager();
@@ -75,6 +93,8 @@ public class AuthController implements Controller {
 												"] as auth resource because it's not internal.");
 				}
 				manager.config(restflow, authResource);
+				this.restflow = restflow;
+				resolveFs();
 			} catch(Throwable e) {
 				logger.error("Cannot start Auth Controller due to exception.", e);
 			}
@@ -88,6 +108,22 @@ public class AuthController implements Controller {
 			publishChangePassword();
 			publishUserInfo();
 			publishRevoke();	
+			publishChangeInfo();
+			publishChangeAvatar();
+		}
+	}
+	
+	private void resolveFs() {
+		String fsName = authResource.getFileSystem();
+		if(StringUtils.isNotEmpty(fsName)) {
+			fileSystem = ResourceFactory.getFileSystemInstance(
+					ResourceFactory.getResourceMetadataInstance(restflow, authResource));		
+			resolveTmpPath();
+		} 
+		if(fileSystem == null){
+			if(logger.isWarnEnabled()) {
+				logger.warn("File system not provided for auth resource. No context user upload can be used.");
+			}
 		}
 	}
 	
@@ -96,7 +132,7 @@ public class AuthController implements Controller {
 		if(method != null) {
 			String url = RestflowHttpMethod.POST.parseUrl(method.getUrl());
 			router.route(url).handler(BodyHandler.create());
-			router.route(url).handler(routingContext -> {
+			router.post(url).handler(routingContext -> {
 					  manager.authenticate(method, resolveAuthDetails(routingContext))
 					  .success(obj -> {
 						  manager.getAuthorization(obj)
@@ -138,7 +174,7 @@ public class AuthController implements Controller {
 		if(method != null) {
 			String url = RestflowHttpMethod.POST.parseUrl(method.getUrl());
 			router.route(url).handler(BodyHandler.create());
-			router.route(url).handler(routingContext -> {
+			router.post(url).handler(routingContext -> {
 					  resolveAuth(routingContext, handler -> {
 						  AuthDetails auth = resolveAuthDetails(routingContext);			
 						  manager.authenticate(authResource.getMethod(AUTHENTICATE_METHOD), auth)
@@ -171,7 +207,7 @@ public class AuthController implements Controller {
 	private void publishUserInfo() {
 		ResourceMethod method = authResource.getMethod(USER_INFO_METHOD);
 		if(method != null) {
-			router.route(RestflowHttpMethod.GET.parseUrl(method.getUrl()))
+			router.get(RestflowHttpMethod.GET.parseUrl(method.getUrl()))
 			.handler(routingContext -> {
 				resolveAuth(routingContext, obj -> {
 				  	 routingContext.response()
@@ -181,6 +217,85 @@ public class AuthController implements Controller {
 			});
 			if(logger.isInfoEnabled()) {
 				logger.info("Revoke method with url "+method.getUrl()+" deployed.");
+			}
+		}
+	}
+	
+	private void publishChangeInfo() {
+		ResourceMethod method = authResource.getMethod(CHANGE_USER_INFO_METHOD);
+		if(method != null) {
+			String url = RestflowHttpMethod.PATCH.parseUrl(method.getUrl());
+			router.route(url).handler(BodyHandler.create());
+			router.patch(url)
+			.handler(routingContext -> {
+				resolveAuth(routingContext, obj -> {
+					ResourceObject info = resolveObject(routingContext);	
+					String idProperty = authResource.getIdProperty();
+					info.setProperty(idProperty, obj.getProperty(idProperty));
+					manager.changeUserInfo(method, info)
+					.success(Void -> {
+			  			 routingContext.response()
+			  			 .setStatusCode(HttpResponseStatus.OK.code())
+			  			 .end();				  				 
+					})
+					.error(error -> {
+			  			 routingContext.response()
+			  			 .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
+			  			 .end(getErrorJson(error));			  				 
+					});
+				});
+			});
+			if(logger.isInfoEnabled()) {
+				logger.info("Revoke method with url "+method.getUrl()+" deployed.");
+			}
+		}		
+	}
+	
+	private void publishChangeAvatar() {
+		UploadMethod method = authResource.getUpload();
+		if(method != null && method.isActive() && fileSystem != null) {
+			String idProperty = authResource.getIdProperty();
+			String url = RestflowHttpMethod.POST.parseUrl(CHANGE_AVATAR_URL);
+			router.post(url)
+			.handler(routingContext -> {
+				if(logger.isInfoEnabled()) {
+					logger.info("Upload profile request for resource [" +
+								authResource.getName() + 
+								"] with path " + url);
+				}					
+				resolveAuth(routingContext, obj -> {
+					HttpServerRequest req = routingContext.request();
+					HttpServerResponse res = routingContext.response();		
+					Object id = obj.getProperty(idProperty);
+					if(id == null || StringUtils.isEmpty(id.toString())) {
+						routingContext.fail(new RestflowException("Invalid id provided."));
+					} else {
+						req.setExpectMultipart(true)				
+					       .uploadHandler(upload -> {
+							  String uploadedFileName = new File(tmpPath, UUID.randomUUID().toString()).getPath();
+							  upload.streamToFileSystem(uploadedFileName);
+					          upload.exceptionHandler(routingContext::fail)
+					          		.endHandler(v -> {
+					          		fileSystem.save(new ResourceFile()
+													.id(id)
+													.uploaded(true)
+													.resourceName(method.getUseResource())
+													.path(uploadedFileName)
+													.fileName(upload.filename()))
+					          		.success(s -> {
+							        	  res.setChunked(true)
+							        	  	 .setStatusCode(HttpResponseStatus.OK.code())
+							        	  	 .end();			          			
+					          		}).error(err -> {
+							        	  routingContext.fail(err);
+							        });
+					          });
+					        });						
+					}
+				});			
+			});	
+			if(logger.isInfoEnabled()) {
+				logger.info("Change avatar method with url "+CHANGE_AVATAR_URL+" deployed.");
 			}
 		}
 	}
@@ -236,6 +351,36 @@ public class AuthController implements Controller {
 			}
 		}
 		throw new RestflowInvalidRequestException("Request body is empty.");
+	}
+	
+	private ResourceObject resolveObject(RoutingContext routingContext) {
+		String json = routingContext.getBodyAsString();
+		if(json != null) {
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				return (ResourceObject) mapper.readValue(json, ResourceObject.class);
+			} catch (Throwable e) {
+				throw new ResflowObjectConversionException(
+						"It was impossible to convert request data to object(s).", e);
+			}
+		}
+		throw new RestflowInvalidRequestException("Request body is empty.");
+	}
+	
+
+	private void resolveTmpPath() {
+		tmpPath = restflow
+				  .getEnvironment()
+				  .getProperty(RestflowEnvironment.TMP_PATH_PROPERTY);
+		if(StringUtils.isEmpty(tmpPath)) {
+			tmpPath = "./tmp/";
+		} else if(!tmpPath.endsWith("/")) {
+			tmpPath += "/";
+		}
+		File file = new File(tmpPath);
+		if(!file.exists()) {
+			file.mkdirs();
+		}
 	}
 	
 }

@@ -57,6 +57,8 @@ public class Restflow extends RestflowDefaultConfig {
 	
 	private Map<String, DatasourceDetails> datasources;
 	
+	private Map<String, FileSystemDetails> fileSystems;
+	
 	private HookManager hookManager;
 	
 	private Vertx vertx;
@@ -69,6 +71,7 @@ public class Restflow extends RestflowDefaultConfig {
 		environment = new RestflowEnvironmentImpl();
 		context = new RestflowContext();
 		datasources = Maps.newHashMap();
+		fileSystems = Maps.newHashMap();
 		resources = HashBasedTable.create();
 	}
 
@@ -106,14 +109,17 @@ public class Restflow extends RestflowDefaultConfig {
 											  .putAll(datasources)
 											  .build();	
 			}
+			if(!fileSystems.isEmpty()) {
+				fileSystems = new ImmutableMap.Builder<String, FileSystemDetails>()
+											  .putAll(fileSystems)
+											  .build();	
+			}
 			if(!resources.isEmpty()) {
 				resources = new ImmutableTable.Builder<String, String, Resource>()
 											  .putAll(resources)
 											  .build();	
 			}			
 		}
-		mailService = new RestflowMailImpl(this)
-							.config();
 		RestflowVertxStarter.startVertx(environment, res -> {
 			if(res.succeeded()) {
 				//TODO deploy verticle with num instances >=1
@@ -122,6 +128,8 @@ public class Restflow extends RestflowDefaultConfig {
 										.baseUrl(environment.getProperty(RestflowEnvironment.BASE_URL_PROPERTY))
 										.staticAssets(environment.getProperty(RestflowEnvironment.ASSETS_ROUTE_PROPERTY),
 												environment.getProperty(RestflowEnvironment.ASSETS_PATH_PROPERTY)));
+				mailService = new RestflowMailImpl(this)
+						.config();
 			} else {
 				throw new RestflowException("Unable to start vertx core.", res.cause());
 			}
@@ -135,6 +143,14 @@ public class Restflow extends RestflowDefaultConfig {
 			throw new ResflowNotExistsException("Datasource ["+name+"] does not exists.");
 		}
 		return datasourceProperties;
+	}
+	
+	public FileSystemDetails getFileSystem(String name) {
+		FileSystemDetails fsProperties = fileSystems.get(name);
+		if(fsProperties == null) {
+			throw new ResflowNotExistsException("FileSystem ["+name+"] does not exists.");
+		}
+		return fsProperties;
 	}
 	
 	public HookManager getHookManager() {
@@ -165,6 +181,10 @@ public class Restflow extends RestflowDefaultConfig {
 		throw new ResflowNotExistsException("Resource ["+name+version+"] does not exists.");
 	}
 
+	public Map<String, FileSystemDetails> getAllFileSystems() {
+		return fileSystems;
+	}
+	
 	public Map<String, DatasourceDetails> getAllConnections() {
 		return datasources;
 	}
@@ -221,6 +241,7 @@ public class Restflow extends RestflowDefaultConfig {
 		Stream.of(models).forEach(model -> {
 			String version = model.getVersion().toLowerCase(); 
 			loadDatasources(model.getDatasources());
+			loadFileSystems(model.getFileSystems());
 			loadResources(model.getResources(), version);
 		});
 		return this;
@@ -311,6 +332,24 @@ public class Restflow extends RestflowDefaultConfig {
 							}
 							if(logger.isInfoEnabled()) {
 								logger.info("Datasource ["+key+"] loaded.");
+							}
+						});
+	}
+	
+	private void loadFileSystems(List<FileSystemDetails> fileSystemsToLoad) {
+		if(fileSystemsToLoad == null || fileSystemsToLoad.isEmpty()) {
+			return;
+		}
+		fileSystemsToLoad.stream()
+						.forEach(newFs -> {
+							String key = newFs.getName();
+							if(fileSystems.containsKey(key)) {
+								throw new RestflowDuplicatedRefException("Filesystem ["+key+"] already exists");
+							} else {
+								fileSystems.put(key, newFs);
+							}
+							if(logger.isInfoEnabled()) {
+								logger.info("Filesystem ["+key+"] loaded.");
 							}
 						});
 	}
@@ -443,4 +482,5 @@ public class Restflow extends RestflowDefaultConfig {
 		}
 		return path;
 	}
+
 }

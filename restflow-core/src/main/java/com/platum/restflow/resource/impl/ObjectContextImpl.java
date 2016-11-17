@@ -29,6 +29,8 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 
 	protected boolean ignore;
 	
+	protected boolean partial;
+	
 	protected boolean isNew;
 	
 	public ObjectContextImpl(Resource resource, ResourceService<T> service, T object) {
@@ -54,13 +56,16 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 	@Override
 	public void save(ResourceMethod method, PromiseHandler<PromiseResult<T>> handler) {
 		Promise<T> promise = null;
+		ResourceMethod m = method == null ? contextMethod : method;
 		if(isNew) {
-			promise = service.insert(method == null ? contextMethod : method, object);
+			promise = service.insert(m, object);
+		} else if(partial) {
+			promise = service.partialUpdate(m, object);
 		} else {
-			if(method == null) {
+			if(m == null) {
 				promise = service.update(object);
 			} else {
-				promise = service.update(method, object);
+				promise = service.update(m, object);
 			}
 		}
 		ignore = (method == null);
@@ -126,6 +131,16 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 	@Override
 	public ObjectContextImpl<T> ignore(boolean ignore) {
 		this.ignore = ignore;
+		return this;
+	}
+	
+	@Override
+	public boolean partial() {
+		return this.partial();
+	}
+	
+	public ObjectContextImpl<T> partial(boolean partial) {
+		this.partial = partial;
 		return this;
 	}
 	

@@ -11,6 +11,13 @@
             </properties>
         </datasource>
     </datasources>
+    <filesystems>
+        <filesytem name="localFs">
+            <properties>
+                <property name="path" value="."/>
+            </properties>
+        </filesytem>
+    </filesystems>
     <resources>
         <resource name="resource_test" table="test" class="">
         	<datasource>hsqldb</datasource>

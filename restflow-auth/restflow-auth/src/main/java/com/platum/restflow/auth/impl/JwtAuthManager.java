@@ -1,13 +1,18 @@
 package com.platum.restflow.auth.impl;
 
+import java.util.Properties;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.auth0.jwt.internal.org.apache.commons.lang3.Validate;
+import com.platum.restflow.AuthMetadata;
 import com.platum.restflow.Restflow;
 import com.platum.restflow.RestflowEnvironment;
 import com.platum.restflow.auth.AuthDetails;
+import com.platum.restflow.auth.AuthFactory;
+import com.platum.restflow.auth.AuthFilter;
 import com.platum.restflow.auth.AuthManager;
 import com.platum.restflow.auth.annotation.UseAuthManager;
 import com.platum.restflow.auth.exceptions.InvalidCredentialsException;
@@ -42,8 +47,11 @@ public class JwtAuthManager implements AuthManager
 		} else {
 			try {
 				service = ResourceFactory.getServiceInstance(restflow, authResource);
+				Properties jwtProperties = env.getPropertiesByPrefix(JwtResolver.PROPERTIES_PREFIX);
 				jwtResolver = new JwtResolver()
-								.load(env.getPropertiesByPrefix(JwtResolver.PROPERTIES_PREFIX));
+								.load(jwtProperties);
+				AuthFilter filter = AuthFactory.getAuthFilter();
+				filter.config(jwtProperties);
 				apply = true;
 			} catch(Throwable e) {
 				logger.error("Cannot start Auth Manager due to exception.", e);
@@ -57,17 +65,19 @@ public class JwtAuthManager implements AuthManager
 	}
 
 	@Override
-	public Promise<ResourceObject> authenticate(ResourceMethod method, AuthDetails authDetails) {
+	public Promise<AuthMetadata> authenticate(ResourceMethod method, AuthDetails authDetails) {
 		Validate.notNull(method);
 		Validate.notNull(authDetails);
-		Promise<ResourceObject> promise = PromiseFactory.getPromiseInstance();
+		Promise<AuthMetadata> promise = PromiseFactory.getPromiseInstance();
 		if(StringUtils.isEmpty(authDetails.getUserName()) || StringUtils.isEmpty(authDetails.getPassword())) {
 			promise.reject(new InvalidCredentialsException("No username or password provided."));
 		} else {
 			service.get(method, new Params().addParam(USERNAME_PARAM, authDetails.getUserName())
 					.addParam(PASSWORD_PARAM, authDetails.getPassword()))
 			.success(obj -> {
-				promise.resolve(obj);
+				AuthMetadata auth = new AuthMetadata();
+				auth.putAll(obj);
+				promise.resolve(auth);
 			})
 			.error(error -> {
 				promise.reject(new InvalidCredentialsException(error));
@@ -86,9 +96,25 @@ public class JwtAuthManager implements AuthManager
 		} else if(StringUtils.isEmpty(authDetails.getPassword()) || StringUtils.isEmpty(authDetails.getPasswordConfirm()) 
 					|| !authDetails.getNewPassword().equals(authDetails.getPasswordConfirm())) {
 			promise.reject(new InvalidPasswordConfirmationException());
-		}		
-		object.setProperty(PASSWORD_PARAM, authDetails.getNewPassword());
-		service.update(method, object)
+		} else {
+			object.setProperty(PASSWORD_PARAM, authDetails.getNewPassword());
+			service.update(method, object)
+			.allways(res -> {
+				if(res.failed()) {
+					promise.reject(res.cause());
+				} else {
+					promise.resolve();
+				}
+			});	
+		}
+		return promise;
+	}
+	
+	@Override
+	public Promise<Void> changeUserInfo(ResourceMethod method, ResourceObject object) {
+		Validate.notNull(method);
+		Promise<Void> promise = PromiseFactory.getPromiseInstance();
+		service.partialUpdate(method, object)
 		.allways(res -> {
 			if(res.failed()) {
 				promise.reject(res.cause());
@@ -96,19 +122,19 @@ public class JwtAuthManager implements AuthManager
 				promise.resolve();
 			}
 		});
-		return promise;
+		return promise;		
 	}
 	
 	@Override
-	public Promise<String> getAuthorization(ResourceObject object) {
+	public Promise<String> getAuthorization(AuthMetadata object) {
 		Promise<String> promise = PromiseFactory.getPromiseInstance();
 		promise.resolve(jwtResolver.encode(object));
 		return promise;
 	}
 	
 	@Override
-	public Promise<ResourceObject> resolveAuthorization(String authCode) {
-		Promise<ResourceObject> promise = PromiseFactory.getPromiseInstance();
+	public Promise<AuthMetadata> resolveAuthorization(String authCode) {
+		Promise<AuthMetadata> promise = PromiseFactory.getPromiseInstance();
 		promise.resolve(jwtResolver.decode(authCode));
 		return promise;		
 	}

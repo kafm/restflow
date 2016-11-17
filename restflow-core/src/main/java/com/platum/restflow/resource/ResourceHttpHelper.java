@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.platum.restflow.AuthMetadata;
 import com.platum.restflow.RestflowDefaultConfig;
 import com.platum.restflow.exceptions.ResflowObjectConversionException;
 import com.platum.restflow.exceptions.RestflowException;
@@ -81,7 +82,6 @@ public class ResourceHttpHelper<T> {
 	}
 	
 	public ResourceService<T> service() {
-		//TODO resolve authorization
 		try {
 			if(service == null) {
 				service = ResourceFactory.getServiceInstance(metadata);
@@ -92,6 +92,7 @@ public class ResourceHttpHelper<T> {
 			}
 			throw new RestflowException("Cannot resolve resource service.");
 		}
+		service.authorization((AuthMetadata) context.get(AUTH_HEADER));
 		return service;
 	}
 	
@@ -156,5 +157,5 @@ public class ResourceHttpHelper<T> {
 		}
 		return this;
 	}
-
+	
 }

@@ -16,6 +16,6 @@ public interface RestflowMail {
 
 	public RestflowMail config();
 	
-	public Promise<String> sendEmail(Message email);
+	public Promise<Void> sendEmail(Message email);
 
 }

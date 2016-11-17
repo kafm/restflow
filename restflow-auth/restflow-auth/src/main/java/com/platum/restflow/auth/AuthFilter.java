@@ -5,12 +5,13 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import com.auth0.jwt.internal.org.apache.commons.lang3.Validate;
-import com.platum.restflow.components.Filter;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.resource.ResourceMethod;
 import com.platum.restflow.resource.ResourceObject;
 
-public interface AuthFilter extends Filter {
+import io.vertx.ext.web.RoutingContext;
+
+public interface AuthFilter {
 	
 	static final String AUTH_HEADER = "Authorization";
 	
@@ -19,6 +20,8 @@ public interface AuthFilter extends Filter {
 	static final String ROLES_ATTR = "roles";
 
 	void config(Properties properties);
+	
+	void filter(ResourceMethod method, RoutingContext context);
 	
 	default String[] getRolesFromObject(ResourceObject object) {
 		if(object != null) {
@@ -31,7 +34,7 @@ public interface AuthFilter extends Filter {
 				return ((Collection<?>) roles).stream()
 					    .map(role -> role != null ? role.toString() : null)
 					    .toArray(size -> new String[size]);
-			} else {
+			} else if(roles != null){
 				throw new RestflowException("Invalid roles object ["+object.getClass()+"].");
 			}
 		}

@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement(name = "method")
 @XmlAccessorType (XmlAccessType.FIELD)
-public class ResourceMethod implements Serializable, Cloneable {
+public class ResourceMethod extends AbstractMethod implements Serializable, Cloneable {
 	
 	private static final long serialVersionUID = 1860661592152932194L;
 	
@@ -26,19 +26,9 @@ public class ResourceMethod implements Serializable, Cloneable {
 	private String query;
 	
 	private boolean wrap;
-
-	private boolean internal;
-	
-	@XmlAttribute
-	private boolean upload;
 	
 	@XmlTransient
 	private String[] params;
-	
-	private String roles;
-	
-	@XmlTransient
-	private String[] rolesArr;
 
 	public String getName() {
 		return StringUtils.isEmpty(name)? url : name;
@@ -59,29 +49,11 @@ public class ResourceMethod implements Serializable, Cloneable {
 	}
 
 	public String getUrl() {
-		return url;
+		return StringUtils.isEmpty(url) ? name : url;
 	}
 
 	public ResourceMethod setUrl(String impl) {
 		this.url = impl;
-		return this;
-	}
-
-	public boolean isInternal() {
-		return internal;
-	}
-
-	public ResourceMethod setInternal(boolean internal) {
-		this.internal = internal;
-		return this;
-	}
-
-	public boolean isUpload() {
-		return upload;
-	}
-
-	public ResourceMethod setUpload(boolean upload) {
-		this.upload = upload;
 		return this;
 	}
 	
@@ -94,25 +66,6 @@ public class ResourceMethod implements Serializable, Cloneable {
 		return params;
 	}
 
-	public String getRoles() {
-		return roles;
-	}
-	
-	public boolean hasRoles() {
-		return roles != null && StringUtils.isNotEmpty(roles);
-	}
-
-	public ResourceMethod setRoles(String roles) {
-		this.roles = roles;
-		rolesArr = stringToArray(roles);
-		return this;
-	}
-	
-	public String[] getRolesAsArray() 
-	{
-		return rolesArr;
-	}
-	
 	public boolean isWrap() {
 		return wrap;
 	}
@@ -125,8 +78,8 @@ public class ResourceMethod implements Serializable, Cloneable {
 	@Override
 	public String toString() {
 		return "ResourceMethod [name=" + name + ", query=" + query + ", url=" + url + ", internal=" + internal
-				+ ", upload=" + upload + ", params=" + params + Arrays.toString(params) + ", roles="
-				+ roles + ", rolesArr=" + Arrays.toString(rolesArr) + "]";
+				+ ", params=" + params + Arrays.toString(params) + ", roles="
+				+ getRoles() + ", rolesArr=" + Arrays.toString(getRolesAsArray()) + "]";
 	}
 	
 	public ResourceMethod clone() {
@@ -135,14 +88,6 @@ public class ResourceMethod implements Serializable, Cloneable {
 		} catch(Throwable e) {
 			throw new RuntimeException("Error when clonning object.", e);
 		}
-	}
-
-	private String[] stringToArray(String params) 
-	{
-		if(!StringUtils.isEmpty(params)) {
-			return params.replaceAll(" ", "").split(",");
-		}
-		return null;
 	}
 	
 }

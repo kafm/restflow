@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.platum.restflow.DatasourceDetails;
+import com.platum.restflow.FileSystemDetails;
 import com.platum.restflow.RestflowModel;
 import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceMethod;
@@ -29,10 +30,15 @@ public class DatasourcePropertiesAdapterTest {
 		Properties properties = new Properties();
 		properties.put("jdbcUrl", "jdbc:hsqldb:mem:test?shutdown=true");
 		properties.put("dataSourceClassName", "org.hsqldb.jdbcDriver");
+		Properties fsProps = new Properties();
+		fsProps.put("path", ".");
 		model.setDatasources(Arrays.asList(new DatasourceDetails()
 												.setImplClass(JdbcRepository.class.getName())
 												.setName("hsqldb")
 												.setProperties(properties)));
+		model.setFileSystems(Arrays.asList(new FileSystemDetails()
+												.setName("xpto")
+												.setProperties(fsProps)));
 		model.setResources(Arrays.asList(new Resource()
 												.setName("test_resource")
 												.setIdProperty("x")
@@ -65,6 +71,7 @@ public class DatasourcePropertiesAdapterTest {
 		JAXBContext jaxbContext = JAXBContext.newInstance(RestflowModel.class);
 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 		RestflowModel model = (RestflowModel) jaxbUnmarshaller.unmarshal(ResourceUtils.getURL("classpath:models/test.xml").openStream());
+		System.out.println(model.toString());
 		Assert.assertEquals(1, model.getResources().size());
 	}
 	

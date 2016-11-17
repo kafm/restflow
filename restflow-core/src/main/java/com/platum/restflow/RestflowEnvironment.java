@@ -8,7 +8,9 @@ public interface RestflowEnvironment {
 	
 	static final String DEFAULT_CONFIG_FILE = "restflow.properties";
 	
-	static final String LOG_CONFIG_PATH_PROPERTY = "restflow.log.path";
+	static final String TMP_PATH_PROPERTY = "restflow.tmp.path";
+	
+	static final String LOG_PATH_PROPERTY = "restflow.log.path";
 	
 	static final String MODELS_PATH_PROPERTY = "restflow.models.path";
 	

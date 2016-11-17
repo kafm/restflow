@@ -21,10 +21,10 @@ import com.auth0.jwt.Algorithm;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
+import com.platum.restflow.AuthMetadata;
 import com.platum.restflow.auth.AuthFilter;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.exceptions.RestflowUnauthorizedException;
-import com.platum.restflow.resource.ResourceObject;
 
 public class JwtResolver {
 	
@@ -58,7 +58,7 @@ public class JwtResolver {
 	
 	private PrivateKey privateKey;
 	
-	public String encode(ResourceObject object) {
+	public String encode(AuthMetadata object) {
 		final long iat = System.currentTimeMillis() / 1000l; 
 		final long exp = iat + expirationInterval;
 		final HashMap<String, Object> claims = new HashMap<String, Object>();
@@ -71,21 +71,19 @@ public class JwtResolver {
 		return AuthFilter.BEARER_AUTH_HEADER+" "+signer.sign(claims);
 	}
 	
-	public ResourceObject decode(String token) {
+	public AuthMetadata decode(String token) {
 		if(StringUtils.isEmpty(token)) {
 			throw new RestflowUnauthorizedException("No token provided."); 
 		}
-		System.out.println(token);
 		String[] parts = token.split(" ");
 		String jwt = parts.length == 1 ? token : parts[1];
-		System.out.println(jwt);
 		try {
 			final JWTVerifier verifier = publicKey != null ? new JWTVerifier(publicKey)
 					 : new JWTVerifier(secret);
 			final Map<String,Object> claims= verifier.verify(jwt);
 			@SuppressWarnings("unchecked")
 			Map<String, Object> objectMap = (Map<String, Object>) claims.get("object");
-			ResourceObject object = new ResourceObject();
+			AuthMetadata object = new AuthMetadata();
 			if(objectMap != null) {
 				object.putAll(objectMap);
 			}

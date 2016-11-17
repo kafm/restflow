@@ -180,6 +180,24 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 			closeConnectionIfNecessary(connection);
 		}
 	}
+	
+	@Override
+	public void delete(ResourceMethod method, Params params) {
+		Connection connection = resolveConnection();
+		if(logger.isInfoEnabled()) {
+			logger.info("Executing query "+method.getQuery());
+		}
+		try {
+			addQueryParams(
+					connection.createQuery(method.getQuery()),
+					method.getParams(), params)
+				.executeUpdate();
+		} catch(Throwable e) {
+			throw jdbcClient.translateException(e);
+		} finally {
+			closeConnectionIfNecessary(connection);
+		}
+	}
 
 	@Override
 	public void batchUpdate(ResourceMethod method, List<T> objects) {

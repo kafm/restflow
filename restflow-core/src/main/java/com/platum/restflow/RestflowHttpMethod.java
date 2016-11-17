@@ -5,6 +5,8 @@ import org.apache.commons.lang3.Validate;
 public enum RestflowHttpMethod {
     GET("GET"),
     GET_WITH_ID("GET /:"+RestflowDefaultConfig.DEFAULT_ID_PARAM),
+    DOWNLOAD("GET /:"+RestflowDefaultConfig.DEFAULT_ID_PARAM+"/download"),
+    UPLOAD("POST /:"+RestflowDefaultConfig.DEFAULT_ID_PARAM+"/upload"),
     POST("POST"),
     PUT("PUT"),
     PUT_WITH_ID("PUT /:"+RestflowDefaultConfig.DEFAULT_ID_PARAM),

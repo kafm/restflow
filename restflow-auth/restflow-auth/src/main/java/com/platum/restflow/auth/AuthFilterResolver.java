@@ -16,9 +16,7 @@ public class AuthFilterResolver implements Filter {
 	
 	@Override
 	public void filter(ResourceMethod method, RoutingContext context) {
-		if(filter == null) {
-			context.next();
-		} else {
+		if(filter != null) {
 			filter.filter(method, context);
 		}
 	}

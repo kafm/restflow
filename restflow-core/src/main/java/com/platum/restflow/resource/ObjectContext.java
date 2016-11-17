@@ -33,4 +33,6 @@ public interface ObjectContext<T> {
 	
 	ObjectContext<T> ignore(boolean ignore);
 	
+	boolean partial();
+	
 }

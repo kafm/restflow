@@ -8,12 +8,14 @@ import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.Maps;
 import com.platum.restflow.DatasourceDetails;
+import com.platum.restflow.FileSystemDetails;
 import com.platum.restflow.Restflow;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.resource.annotation.HookManager;
 import com.platum.restflow.resource.annotation.QueryBuilderImpl;
 import com.platum.restflow.resource.impl.ResourceFailureHandlerImpl;
 import com.platum.restflow.resource.impl.ResourceServiceImpl;
+import com.platum.restflow.resource.impl.SimpleResourceFileSystem;
 import com.platum.restflow.resource.impl.jdbc.JdbcRepository;
 import com.platum.restflow.resource.query.QueryBuilder;
 import com.platum.restflow.utils.ClassUtils;
@@ -69,6 +71,20 @@ public class ResourceFactory {
 	public static <T> ResourceController<T> getControllerInstance(ResourceMetadata<T> resourceMetadata) {
 		Validate.notNull(resourceMetadata, "Restflow metadata cannot be null");
 		return getComponentInstance(ResourceController.class, resourceMetadata);
+	}
+
+	public static <T> ResourceFileSystem getFileSystemInstance(ResourceMetadata<T> resourceMetadata) {
+		Validate.notNull(resourceMetadata, "Restflow metadata cannot be null");
+		FileSystemDetails fs = resourceMetadata.fileSystem();
+		if(fs == null) {
+			return null;
+		}
+		String implClass = fs.getImplClass();
+		if(implClass == null) {
+			implClass = SimpleResourceFileSystem.class.getName();
+		}
+		return (ResourceFileSystem) 
+				getComponentInstance(ClassUtils.getClassByName(implClass), resourceMetadata);
 	}
 	
 	public static <T> Class<? extends QueryBuilder> getQueryBuilderClass(ResourceMetadata<T> resourceMetadata) {

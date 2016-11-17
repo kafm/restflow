@@ -1,5 +1,6 @@
 package com.platum.restflow.auth;
 
+import com.platum.restflow.AuthMetadata;
 import com.platum.restflow.Restflow;
 import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceMethod;
@@ -24,14 +25,16 @@ public interface AuthManager
 	
 	public boolean authApplies();
 	
-	public Promise<ResourceObject> authenticate(ResourceMethod method, AuthDetails authDetails);
+	public Promise<AuthMetadata> authenticate(ResourceMethod method, AuthDetails authDetails);
 	
 	public Promise<Void> changePassword(ResourceMethod method, ResourceObject object, AuthDetails authDetails);
+	
+	public Promise<Void> changeUserInfo(ResourceMethod method, ResourceObject object);
 		
 	public Promise<Void> revoke(ResourceMethod method, String token);
 	
-	public Promise<String> getAuthorization(ResourceObject object);
+	public Promise<String> getAuthorization(AuthMetadata object);
 	
-	public Promise<ResourceObject> resolveAuthorization(String authCode);
+	public Promise<AuthMetadata> resolveAuthorization(String authCode);
 		
 }

@@ -55,6 +55,10 @@ public class RestflowModel {
 	@XmlElementWrapper(name = "datasources")
 	@XmlElement(name="datasource")
 	private List<DatasourceDetails> datasources;
+	
+	@XmlElementWrapper(name = "filesystems")
+	@XmlElement(name="filesytem")
+	private List<FileSystemDetails> fileSystems;
 
 	@XmlElementWrapper
 	@XmlElement(name="resource")
@@ -95,6 +99,87 @@ public class RestflowModel {
 		return version;
 	}
 
+	/**
+	 * 
+	 * @param datasources
+	 * @return
+	 */
+	public RestflowModel setFileSystems(List<FileSystemDetails> fileSystems) {
+		this.fileSystems = fileSystems;
+		return this;
+	}
+	
+	/*
+	 * 
+	 */
+	public RestflowModel createFileSystem(FileSystemDetails fs) {
+		Validate.notNull(fs, "Cannot add a null filesystem.");
+		Validate.notEmpty(fs.getName(), "Filesystem name cannot be null or empty.");
+		if(fileSystems == null) {
+			fileSystems = new ArrayList<>();
+		} else if(getFileSystem(fs.getName()) != null) {
+			throw new RestflowDuplicatedRefException("Filesystem ["+fs.getName()+"] already exists.");
+		}
+		fileSystems.add(fs);
+		return this;
+	}
+	
+	/**
+	 * 
+	 * @param datasource
+	 * @return
+	 */
+	public RestflowModel updateFileSystem(FileSystemDetails fs) {
+		Validate.notNull(fs, "Cannot update a null filesystem.");
+		Validate.notEmpty(fs.getName(), "Filesystem name cannot be null or empty.");
+		if(resources != null) {
+			ListIterator<FileSystemDetails> iterator = fileSystems.listIterator();
+			while(iterator.hasNext()) {
+				if(iterator.next().getName()
+						.equals(fs.getName())) {
+					iterator.set(fs);
+					return this;
+				}
+			}
+		}
+		throw new ResflowNotExistsException("Datasource does not exists.");
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public RestflowModel removeFileSystem(String name) {
+		fileSystems.removeIf(fs -> 
+					fs.getName().equals(name));
+		return this;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public List<FileSystemDetails> getFileSystems() {
+		return fileSystems;
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public FileSystemDetails getFileSystem(String name) {
+		try {
+			return fileSystems.stream()
+				   .filter(fs -> fs.getName().equals(name))
+				   .findAny()
+				   .orElse(null);
+		} catch(Throwable e) {
+			return null;
+		}
+	}
+	
 	/**
 	 * 
 	 * @param datasources
@@ -175,6 +260,8 @@ public class RestflowModel {
 			return null;
 		}
 	}
+	
+
 	
 	/**
 	 * Sets model's resources. 
@@ -269,8 +356,8 @@ public class RestflowModel {
 
 	@Override
 	public String toString() {
-		return "RestflowModel [version=" + version + ", datasources=" + datasources + ", resources=" + resources + "]";
-	}
-	
+		return "RestflowModel [version=" + version + ", datasources=" + datasources + ", fileSystems=" + fileSystems
+				+ ", resources=" + resources + "]";
+	}	
 		
 }
