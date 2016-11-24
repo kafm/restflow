@@ -19,7 +19,15 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.IntegerValidator;
 import org.apache.commons.validator.routines.LongValidator;
 
-import com.platum.restflow.exceptions.InvalidValueValidationException;
+import com.platum.restflow.exceptions.InvalidCreditCardValidationException;
+import com.platum.restflow.exceptions.InvalidDateValidationException;
+import com.platum.restflow.exceptions.InvalidDecimalValidationException;
+import com.platum.restflow.exceptions.InvalidEmailValidationException;
+import com.platum.restflow.exceptions.InvalidIntegerValidationException;
+import com.platum.restflow.exceptions.InvalidIpv4ValidationException;
+import com.platum.restflow.exceptions.InvalidIpv6ValidationException;
+import com.platum.restflow.exceptions.InvalidLongValidationException;
+import com.platum.restflow.exceptions.InvalidUrlValidationException;
 import com.platum.restflow.exceptions.MaxLengthValidationException;
 import com.platum.restflow.exceptions.MaxValueValidationException;
 import com.platum.restflow.exceptions.MinLengthValidationException;
@@ -72,8 +80,9 @@ public class ResourcePropertyValidator {
 			} catch(RestflowValidationException e) {
 				exceptions.add(e);
 			} catch(Throwable e) {
-				exceptions.add(
-						new RestflowFieldConversionValidationException("Impossible to convert field ["+property.getName()+"]", e));
+				RestflowFieldConversionValidationException ex = new RestflowFieldConversionValidationException("Impossible to convert field ["+property.getName()+"]", e);
+				ex.params(property.getName());
+				exceptions.add(ex);
 			}
 		});
 		if(!exceptions.isEmpty()) {
@@ -100,8 +109,10 @@ public class ResourcePropertyValidator {
 		if(property.isRequired() 
 				&& GenericValidator.isBlankOrNull(strVal) 
 				&& !property.getType().equals(ResourcePropertyType.BOOLEAN)) {
-			throw new RequiredValidationException("Property "+ property.getLabel()+" is mandatory.")
-						.setContextProperty(property);
+			RequiredValidationException ex =  new RequiredValidationException("Property "+ property.getLabel()+" is mandatory.")
+												.setContextProperty(property);
+			ex.params(property.getLabel());
+			throw ex;
 		} 
 		else if(property.getType().equals(ResourcePropertyType.BOOLEAN)) {
 			return validateBoolean(property, strVal);	
@@ -140,7 +151,9 @@ public class ResourcePropertyValidator {
 		String max = property.getMax();
 		Integer intVal = validator.validate(value);
 		if(intVal == null && StringUtils.isNotEmpty(value)) {
-			throw new InvalidValueValidationException("Invalid integer value for property "+property.getLabel());
+			InvalidIntegerValidationException ex = new InvalidIntegerValidationException("Invalid integer value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;
 		}
 		validateRange(property.getLabel(), intVal, validator.validate(min), validator.validate(max));
 		return intVal;
@@ -152,7 +165,9 @@ public class ResourcePropertyValidator {
 		String max = property.getMax();
 		Long longVal = validator.validate(value);
 		if(longVal == null  && StringUtils.isNotEmpty(value)) {
-			throw new InvalidValueValidationException("Invalid long value for property "+property.getLabel());
+			InvalidLongValidationException ex = new InvalidLongValidationException("Invalid long value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;
 		}
 		validateRange(property.getLabel(), longVal, validator.validate(min), validator.validate(max));
 		return longVal;		
@@ -164,7 +179,9 @@ public class ResourcePropertyValidator {
 		String max = property.getMax();
 		BigDecimal decimalVal = validator.validate(value);
 		if(decimalVal == null  && StringUtils.isNotEmpty(value)) {
-			throw new InvalidValueValidationException("Invalid long value for property "+property.getLabel());
+			InvalidDecimalValidationException ex = new InvalidDecimalValidationException("Invalid decimal value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;
 		}
 		validateRange(property.getLabel(), decimalVal, validator.validate(min), validator.validate(max));
 		return decimalVal;		
@@ -184,7 +201,9 @@ public class ResourcePropertyValidator {
 		String max = property.getMax();
 		Date dateValue = validator.validate(value, pattern);
 		if(dateValue == null  && StringUtils.isNotEmpty(value)) {
-			throw new InvalidValueValidationException("Invalid date value for property "+property.getLabel());
+			InvalidDateValidationException ex = new InvalidDateValidationException("Invalid date value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;
 		}
 		validateRange(property.getLabel(), dateValue, validator.validate(min), validator.validate(max));
 		return dateValue;		
@@ -192,14 +211,18 @@ public class ResourcePropertyValidator {
 
 	public static String validateCreditCard(ResourceProperty property, String value) {
 		if(!GenericValidator.isCreditCard(value)) {
-			throw new InvalidValueValidationException("Invalid credit card value for property "+property.getLabel());
+			InvalidCreditCardValidationException ex = new InvalidCreditCardValidationException("Invalid credit card value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;
 		}
 		return value;
 	}
 
 	public static String validateEmail(ResourceProperty property, String value) {
 		if(!GenericValidator.isEmail(value)) {
-			throw new InvalidValueValidationException("Invalid credit card value for property "+property.getLabel());
+			InvalidEmailValidationException ex = new InvalidEmailValidationException("Invalid email value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;
 		}
 		return validateString(property, value);		
 	}
@@ -207,7 +230,9 @@ public class ResourcePropertyValidator {
 	public static String validateIpv4(ResourceProperty property, String value) {
 		InetAddressValidator validator = InetAddressValidator.getInstance();
 		if(!validator.isValidInet4Address(value)) {
-			throw new InvalidValueValidationException("Invalid credit card value for property "+property.getLabel());
+			InvalidIpv4ValidationException ex = new InvalidIpv4ValidationException("Invalid ipv4 value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;
 		}
 		return validateString(property, value);				
 	}
@@ -215,14 +240,18 @@ public class ResourcePropertyValidator {
 	public static String validateIpv6(ResourceProperty property, String value) {
 		InetAddressValidator validator = InetAddressValidator.getInstance();
 		if(!validator.isValidInet6Address(value)) {
-			throw new InvalidValueValidationException("Invalid credit card value for property "+property.getLabel());
+			InvalidIpv6ValidationException ex = new InvalidIpv6ValidationException("Invalid ipv6 value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;			
 		}
 		return validateString(property, value);				
 	}
 	
 	public static String validateUrl(ResourceProperty property, String value) {
 		if(!GenericValidator.isUrl(value)) {
-			throw new InvalidValueValidationException("Invalid credit card value for property "+property.getLabel());
+			InvalidUrlValidationException ex = new InvalidUrlValidationException("Invalid url value for property "+property.getLabel());
+			ex.params(property.getLabel());
+			throw ex;				
 		}
 		return validateString(property, value);				
 	}
@@ -240,54 +269,76 @@ public class ResourcePropertyValidator {
 	protected static void validatePattern(String propertyLabel, String pattern, String value) {
 		if(!GenericValidator.isBlankOrNull(pattern)) {
 			if(!Pattern.matches(pattern, value)) {
-				throw new PatternValidationException("Property "+propertyLabel+" does not match with pattern expected "+pattern+".");	
+				PatternValidationException ex = new PatternValidationException("Property "+propertyLabel+" does not match with pattern expected "+pattern+".");	
+				ex.params(propertyLabel, pattern);
+				throw ex;
 			}
 		}
 	}
 			
 	protected static void validateLength(String propertyLabel, String value, Integer min, Integer max) {
 		if(min != null && !GenericValidator.minLength(value, min)) {
-			throw new MinLengthValidationException("Property length of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			MinLengthValidationException ex = new MinLengthValidationException("Property length of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			ex.params(propertyLabel, min);
+			throw ex;
 		} 
 		if(max != null && !GenericValidator.maxLength(value, max)) {
-			throw new MaxLengthValidationException("Property length of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			MaxLengthValidationException ex = new MaxLengthValidationException("Property length of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			ex.params(propertyLabel, max);
+			throw ex;
 		}
 	}
 
 	protected static void validateRange(String propertyLabel, Integer value, Integer min, Integer max) {
 		if(min != null && value < min) {
-			throw new MinValueValidationException("Property value of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			MinValueValidationException ex = new MinValueValidationException("Property value of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			ex.params(propertyLabel, min);
+			throw ex;
 		} 
 		if(max != null && value > max) {
-			throw new MaxValueValidationException("Property value of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			MaxValueValidationException ex = new MaxValueValidationException("Property value of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			ex.params(propertyLabel, max);
+			throw ex;
 		}
 	}
 	
 	protected static void validateRange(String propertyLabel, Long value, Long min, Long max) {
 		if(min != null && value < min) {
-			throw new MinValueValidationException("Property value of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			MinValueValidationException ex = new MinValueValidationException("Property value of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			ex.params(propertyLabel, min);
+			throw ex;
 		} 
 		if(max != null && value > max) {
-			throw new MaxValueValidationException("Property value of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			MaxValueValidationException ex = new MaxValueValidationException("Property value of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			ex.params(propertyLabel, max);
+			throw ex;
 		}
 	}
 	
 	protected static void validateRange(String propertyLabel, BigDecimal value, BigDecimal min, BigDecimal max) {
 		double dValue = value.doubleValue();
 		if(min != null && dValue < min.doubleValue()) {
-			throw new MinValueValidationException("Property value of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			MinValueValidationException ex = new MinValueValidationException("Property value of "+propertyLabel+" is less than the minimum value allowed "+min+".");
+			ex.params(propertyLabel, min);
+			throw ex;
 		} 
 		if(max != null && dValue > max.doubleValue()) {
-			throw new MaxValueValidationException("Property value of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			MaxValueValidationException ex = new MaxValueValidationException("Property value of "+propertyLabel+" is greater than the maximum value allowed "+max+".");
+			ex.params(propertyLabel, max);
+			throw ex;
 		}
 	}
 	
 	protected static void validateRange(String propertyLabel, Date value, Date min, Date max) {
 		if(min != null && !value.before(min)) {
-			throw new MinValueValidationException("Property value of "+value+" is less than the minimum value allowed "+min+".");
+			MinValueValidationException ex = new MinValueValidationException("Property value of "+value+" is less than the minimum value allowed "+min+".");
+			ex.params(propertyLabel, min);
+			throw ex;
 		} 
 		if(max != null && !value.after(max)) {
-			throw new MaxValueValidationException("Property value of "+value+" is greater than the maximum value allowed "+max+".");
+			MaxValueValidationException ex = new MaxValueValidationException("Property value of "+value+" is greater than the maximum value allowed "+max+".");
+			ex.params(propertyLabel, max);
+			throw ex;
 		}
 	}		
 	

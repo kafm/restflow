@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.platum.restflow.DatasourceDetails;
 import com.platum.restflow.FileSystemDetails;
 import com.platum.restflow.Restflow;
+import com.platum.restflow.RestflowContext;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.resource.annotation.HookManager;
 import com.platum.restflow.resource.annotation.QueryBuilderImpl;
@@ -108,8 +109,8 @@ public class ResourceFactory {
 		return builder;
 	}
 	
-	public static PromiseHandler<RoutingContext> getResourceFailureHandler() {
-		return new ResourceFailureHandlerImpl();
+	public static PromiseHandler<RoutingContext> getResourceFailureHandler(RestflowContext context) {
+		return new ResourceFailureHandlerImpl(context);
 	}
 	
 	protected static <T, C> T getComponentInstance(Class<T> componentClass, C constructorObject) {

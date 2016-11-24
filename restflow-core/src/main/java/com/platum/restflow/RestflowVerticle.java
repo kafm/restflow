@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
-//TODO assert resource fs when deploying download
 public class RestflowVerticle extends MicroserviceVerticle {
 	
 	private static final List<RestflowHttpMethod> standardHttpMethods = Arrays.asList(
@@ -71,7 +71,16 @@ public class RestflowVerticle extends MicroserviceVerticle {
 	
 	@Override
 	public void stop() {
-		//TODO
+		try {
+			super.stop();
+			if(logger.isDebugEnabled()) {
+				logger.debug("Restflow verticle stopped");
+			}
+		} catch(Throwable e) {
+			if(logger.isWarnEnabled()) {
+				logger.warn("Exception when stopping restflow verticle.", e);
+			}
+		}
 	}
 	
 	public RestflowVerticle staticAssets(String staticAssetsRoute, String staticAssetsPath) {
@@ -123,7 +132,7 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			}
 			router.route(staticAssetsRoute).handler(StaticHandler.create(staticAssetsPath));
 		}
-		router.route().failureHandler(ResourceFactory.getResourceFailureHandler());
+		router.route().failureHandler(ResourceFactory.getResourceFailureHandler(restflow.getContext()));
 		publishControllerServices(router);
 		return router;
 	}
@@ -173,22 +182,33 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			}
 		});
 		DownloadMethod download = resource.getDownload();
-		if(download != null && download.isActive()) {
-			RestflowRoute route = new RestflowRoute()
-					.basicUrl(getBaseUrl(resource.getName(), version))
-					.router(router)
-					.download(download);
-			resourceHandler.download(route, download);
-			route.deploy();
-		}
 		UploadMethod upload = resource.getUpload();
-		if(upload != null && upload.isActive()) {
-			RestflowRoute route = new RestflowRoute()
-					.basicUrl(getBaseUrl(resource.getName(), version))
-					.router(router)
-					.upload(upload);
-			resourceHandler.upload(route, upload);
-			route.deploy();		
+		boolean downloadActive = download != null && download.isActive();
+		boolean uploadActive = upload != null && upload.isActive();
+		if(downloadActive || uploadActive) {
+			try {
+				assertFileSystem(resource.getFileSystem());
+				if(downloadActive) {
+					RestflowRoute route = new RestflowRoute()
+							.basicUrl(getBaseUrl(resource.getName(), version))
+							.router(router)
+							.download(download);
+					resourceHandler.download(route, download);
+					route.deploy();
+				}
+				if(uploadActive) {
+					RestflowRoute route = new RestflowRoute()
+							.basicUrl(getBaseUrl(resource.getName(), version))
+							.router(router)
+							.upload(upload);
+					resourceHandler.upload(route, upload);
+					route.deploy();		
+				}					
+			} catch(Throwable e) {
+				if(logger.isWarnEnabled()) {
+					logger.warn("Resource has download or upload enabled but routes where not deployed due to exception. ", e);
+				}
+			}		
 		}
 	}
 		
@@ -254,6 +274,11 @@ public class RestflowVerticle extends MicroserviceVerticle {
 		return urlBuilder.append("/"+version)
 				  .append("/"+resource)
 				  .toString();
+	}
+	
+	protected void assertFileSystem(String fileSystemName) {
+		Validate.notEmpty(fileSystemName, "Resource filesystem not provided.");
+		restflow.getFileSystem(fileSystemName);
 	}
 	
 }

@@ -129,6 +129,7 @@ public class SimpleResourceFileSystem<T> extends AbstractResourceComponent<T>  i
 				vertx.fileSystem().open(path+FILE_NAME, new OpenOptions(), ar -> {
 					if(ar.succeeded()) {
 						file.stream(ar.result());
+						file.path(path+FILE_NAME);
 						promise.resolve(file);
 					} else {
 						promise.reject(new RestflowException(ar.cause()));
@@ -148,7 +149,9 @@ public class SimpleResourceFileSystem<T> extends AbstractResourceComponent<T>  i
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+		if(logger.isDebugEnabled()) {
+			logger.debug("Filesystem ["+fileSystemName+"] closed.");
+		}
 	}
 	
 	private Promise<Void> writeToFile(String path, ReadStream<Buffer> readStream) {

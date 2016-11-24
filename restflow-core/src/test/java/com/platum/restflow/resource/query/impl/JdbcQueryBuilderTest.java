@@ -11,9 +11,6 @@ import com.platum.restflow.resource.query.QueryFilter;
 import com.platum.restflow.resource.query.QueryModifier;
 import com.platum.restflow.resource.query.QueryOperation;
 
-//TODO rebuild and retest
-
-
 public class JdbcQueryBuilderTest {
 
 	private static Resource resource;

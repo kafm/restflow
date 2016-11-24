@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.platum.restflow.RestflowContext;
 import com.platum.restflow.exceptions.ResflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.exceptions.RestflowForbiddenException;
@@ -16,18 +17,27 @@ import com.platum.restflow.exceptions.RestflowValidationException;
 import com.platum.restflow.utils.promise.PromiseHandler;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext> {
-
+	
 	private final  Logger logger = LoggerFactory.getLogger(getClass());
 	
+	private RestflowContext context;
+	
+	public ResourceFailureHandlerImpl(RestflowContext context) {
+		super();
+		this.context = context;
+	}
+	
 	@Override
-	public void handle(RoutingContext context) {
-		Throwable exception = context.failure();
-		HttpServerResponse response = context.response();
+	public void handle(RoutingContext routingContext) {
+		Throwable exception = routingContext.failure();
+		HttpServerResponse response = routingContext.response();
+		HttpServerRequest request = routingContext.request();
 		int code = 0; 
 		boolean noData = false;
 		if(exception instanceof RestflowUnauthorizedException) {
@@ -50,33 +60,33 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 		if(noData) {
 			response.end();
 		} else {
-			response.end(getJsonError(exception, code).toString());
+			response.end(getJsonError(exception, code, 
+					context.getLangRequestFromRequest(request)).toString());
 		}
 	}
-	
-	protected JsonObject getJsonError(Throwable exception, int code) {
-		//TODO localized message
+
+	protected JsonObject getJsonError(Throwable exception, int code, String langRequest) {
 		if(logger.isDebugEnabled()) {
 			logger.debug("Request error found.", exception);
 		}
 		JsonObject json = new JsonObject()               
 		        .put("timestamp", System.nanoTime())
 		        .put("status",code)
-		        .put("error", exception.getMessage());
+		        .put("error", context.getLangMessage(exception, langRequest));
 		if(exception instanceof RestflowObjectValidationException) {
 			List<RestflowValidationException> exceptions = 
 					((RestflowObjectValidationException) exception).getValidationErrors();
 			List<String> errors = new ArrayList<>();
 			if(exceptions != null && exceptions.size() > 0) {
 				exceptions.stream().forEach(e -> {
-					errors.add(e.getMessage());
+					errors.add(context.getLangMessage(e, langRequest));
 				});
 			}
 			json.put("validationErrors", errors);
 		}
 		return json;		
 	}
-	
+
 }
 
 

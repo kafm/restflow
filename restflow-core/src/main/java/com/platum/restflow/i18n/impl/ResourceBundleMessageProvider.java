@@ -91,12 +91,18 @@ public class ResourceBundleMessageProvider implements MessageProvider {
 	public String getMessage(String message, String baseName, Locale locale, Object... params) {
 		ResourceBundle bundle = getResourceBundle(baseName, locale, classLoader);
 		if(bundle != null) {
-			String text = bundle.getString(message);
-			if(text != null) {
-				if(params == null || params.length == 0) {
-					return text;
-				} else {
-					return MessageFormat.format(text, params);
+			try {
+				String text = bundle.getString(message);
+				if(text != null) {
+					if(params == null || params.length == 0) {
+						return text;
+					} else {
+						return MessageFormat.format(text, params);
+					}
+				}				
+			} catch(Throwable e) {
+				if(logger.isDebugEnabled()) {
+					logger.debug("Can't find message ["+message+"] in bundle", e);
 				}
 			}
 		}
@@ -131,7 +137,6 @@ public class ResourceBundleMessageProvider implements MessageProvider {
 		}
 		catch(Throwable e) {
 			if(locale == Locale.ROOT) {
-				e.printStackTrace();
 				if(logger.isDebugEnabled()) {
 					logger.debug("Resource bundle ["+baseName+"] not found.");
 				}

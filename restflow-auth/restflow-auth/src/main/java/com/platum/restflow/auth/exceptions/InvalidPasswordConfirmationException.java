@@ -6,7 +6,6 @@ public class InvalidPasswordConfirmationException extends RestflowException {
 
 	public InvalidPasswordConfirmationException() {
 		super("New password and it's confirmation does not match.");
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

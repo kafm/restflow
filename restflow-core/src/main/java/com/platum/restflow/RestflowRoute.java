@@ -10,10 +10,8 @@ import com.platum.restflow.components.ComponentFactory;
 import com.platum.restflow.components.Filter;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.resource.DownloadMethod;
-import com.platum.restflow.resource.ResourceFactory;
 import com.platum.restflow.resource.ResourceMethod;
 import com.platum.restflow.resource.UploadMethod;
-import com.platum.restflow.utils.promise.PromiseHandler;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.Route;
@@ -23,8 +21,6 @@ import io.vertx.ext.web.handler.BodyHandler;
 
 
 public class RestflowRoute {
-	
-	private static final PromiseHandler<RoutingContext> failureHandler = ResourceFactory.getResourceFailureHandler();
 	
 	private static final List<Filter> filters = ComponentFactory.getFilterServices();
 	
@@ -63,8 +59,8 @@ public class RestflowRoute {
 			url += httpMethod.parseUrl(RestflowHttpMethod.UPLOAD.value());
 			route = getUploadRoute();
 		}
-		route.handler(context-> handleRoute(context))
-			 .failureHandler(failureHandler::handle); 
+		route.handler(context-> handleRoute(context));
+			// .failureHandler(failureHandler::handle); 
 		return route;
 	}
 	
