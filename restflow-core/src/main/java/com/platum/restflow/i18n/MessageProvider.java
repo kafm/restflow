@@ -13,6 +13,8 @@ public interface MessageProvider {
 	
 	String getMessage(String message);
 	
+	String getMessage(String message, Object... params);
+	
 	String getMessage(String message, Locale locale);
 	
 	String getMessage(String message, String baseName, Locale locale);

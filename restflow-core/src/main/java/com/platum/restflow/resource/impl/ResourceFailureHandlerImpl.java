@@ -39,7 +39,6 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 		HttpServerResponse response = routingContext.response();
 		HttpServerRequest request = routingContext.request();
 		int code = 0; 
-		boolean noData = false;
 		if(exception instanceof RestflowUnauthorizedException) {
 			code = HttpResponseStatus.UNAUTHORIZED.code();	
 		} else if(exception instanceof RestflowForbiddenException) {
@@ -47,8 +46,7 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 		} else if(exception instanceof RestflowNotAllowedException) {
 			code = HttpResponseStatus.METHOD_NOT_ALLOWED.code();
 		} else if(exception instanceof ResflowNotExistsException) {
-			code = HttpResponseStatus.NOT_FOUND.code();
-			noData = true;
+			code = HttpResponseStatus.BAD_REQUEST.code();
 		} else if(exception instanceof RestflowObjectValidationException) {
 			code = HttpResponseStatus.BAD_REQUEST.code();
 		} else if(RestflowException.class.isAssignableFrom(exception.getClass())) {
@@ -57,12 +55,8 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 			code = HttpResponseStatus.INTERNAL_SERVER_ERROR.code();
 		}
 		response.setStatusCode(code);
-		if(noData) {
-			response.end();
-		} else {
-			response.end(getJsonError(exception, code, 
-					context.getLangRequestFromRequest(request)).toString());
-		}
+		response.end(getJsonError(exception, code, 
+				context.getLangRequestFromRequest(request)).toString());
 	}
 
 	protected JsonObject getJsonError(Throwable exception, int code, String langRequest) {

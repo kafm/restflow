@@ -66,6 +66,11 @@ public class ResourceBundleMessageProvider implements MessageProvider {
 	public String getMessage(String message) {
 		return getMessage(message, defaultLocale);
 	}
+	
+	@Override
+	public String getMessage(String message, Object... params) {
+		return getMessage(message, defaultLocale, params);
+	}
 
 	@Override
 	public String getMessage(String message, Locale locale) {

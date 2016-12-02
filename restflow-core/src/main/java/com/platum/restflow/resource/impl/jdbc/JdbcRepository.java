@@ -282,28 +282,36 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 	}
 	
 	private Query addQueryParams(final Query query, String[] paramNames, Params params) {
+		Params usedParams = new Params();
 		if(paramNames != null && paramNames.length > 0) {
 			Map<String, Object> paramsMap = params.getParams();
 			try {
 				Stream.of(paramNames)
 				.forEach(param -> {
 					if(authorization == null || !param.startsWith(AuthMetadata.AUTH_PARAMS_PREFIX)) {
-						query.addParameter(param, paramsMap.get(param));					
+						Object value = paramsMap.get(param);
+						query.addParameter(param, value);	
+						usedParams.addParam(param, value);
 					}
 					else {
-						query.addParameter(param, authorization.get(
-								param.replace(AuthMetadata.AUTH_PARAMS_PREFIX, "")));
+						Object value =  authorization.get(param.replace(AuthMetadata.AUTH_PARAMS_PREFIX, ""));
+						query.addParameter(param, value);
+						usedParams.addParam(param, value);
 					} 
-				});				
+				});	
 			} catch(Throwable e) {
 				throw new InvalidQueryFieldException(e.getMessage());
 			}
 
 		}
+		if(logger.isDebugEnabled()) {
+			logger.debug("Using: "+usedParams);
+		}
 		return query;
 	}
 	
 	private Query addQueryParams(Query query, String[] params, T object) {
+		Params usedParams = new Params();
 		if(params != null && params.length > 0) {
 			try {
 				Stream.of(params)
@@ -314,11 +322,13 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 											? ((ResourceObject) object).getProperty(param)
 											: FieldUtils.readField(object, param, true);
 							query.addParameter(param, value);
+							usedParams.addParam(param, value);
 						}
 						else {
-							query.addParameter(param, authorization.get(
-									param.replace(AuthMetadata.AUTH_PARAMS_PREFIX, "")));
-						} 					
+							Object value =  authorization.get(param.replace(AuthMetadata.AUTH_PARAMS_PREFIX, ""));
+							query.addParameter(param, value);
+							usedParams.addParam(param, value);
+						}
 					} catch(Throwable e) {
 						String error = "Exception occured when getting param ["+param+"] value";
 						if(logger.isDebugEnabled()) {
@@ -330,6 +340,9 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 			} catch(Throwable e) {
 				throw new InvalidQueryFieldException(e.getMessage());
 			}
+		}
+		if(logger.isDebugEnabled()) {
+			logger.debug("Using: "+usedParams);
 		}
 		return query;
 		

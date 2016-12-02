@@ -33,6 +33,8 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 	
 	protected boolean isNew;
 	
+	protected String lang;
+	
 	public ObjectContextImpl(Resource resource, ResourceService<T> service, T object) {
 		this(resource, service, object, null);
 	}
@@ -146,6 +148,17 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 	
 	public ObjectContextImpl<T> contextMethod(ResourceMethod method) {
 		contextMethod = method;
+		return this;
+	}
+
+	@Override
+	public String lang() {
+		return lang;
+	}
+
+	@Override
+	public ObjectContextImpl<T> lang(String lang) {
+		this.lang = lang;
 		return this;
 	}
 	

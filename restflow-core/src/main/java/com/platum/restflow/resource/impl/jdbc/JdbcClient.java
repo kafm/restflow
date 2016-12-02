@@ -56,8 +56,9 @@ public class JdbcClient {
 	}
 	
 	public RestflowException translateException(Throwable e) {
+		RestflowException exceptionToReturn = null;
 		if(e instanceof RestflowException) {
-			return (RestflowException) e;
+			exceptionToReturn = (RestflowException) e;
 		} else if(e instanceof Sql2oException && dbErrorMap != null) {
 			SQLException originalException = (SQLException) e.getCause();
 			if(dbErrorMap != null && originalException != null) {
@@ -70,14 +71,17 @@ public class JdbcClient {
 					.orElse(null);
 					if(errorMap != null && errorMap.getException() != null) {
 						Class<? extends RestflowException> eClass = errorMap.getException();
-						return ClassUtils.newInstance(eClass, errorMap.getMessage());
+						exceptionToReturn = ClassUtils.newInstance(eClass, errorMap.getMessage());
 					}
 				}
 			}
 		} 
 		String error = "Jdbc error when executing operation.";
+		if(exceptionToReturn == null) {
+			exceptionToReturn = new RestflowException(error, e);
+		}
 		logger.error(error, e);
-		return new RestflowException(error, e);
+		return exceptionToReturn;
 	}
 	
 	private static DatasourceConf getOrCreateTemplate(String connectionReference, Properties properties) {

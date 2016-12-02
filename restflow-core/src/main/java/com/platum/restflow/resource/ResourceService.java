@@ -61,6 +61,10 @@ public interface ResourceService<T> extends ResourceComponent<T> {
 	
 	RepositoryTransaction<?> transaction();
 	
+	ResourceService<T> withLang(String lang);
+	
+	String lang();
+	
 	ResourceService<T> authorization(AuthMetadata auth);
 	
 	AuthMetadata authorization();

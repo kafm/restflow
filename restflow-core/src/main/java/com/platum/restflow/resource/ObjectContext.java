@@ -35,4 +35,7 @@ public interface ObjectContext<T> {
 	
 	boolean partial();
 	
+	String lang();
+
+	ObjectContext<T> lang(String lang);
 }

@@ -50,6 +50,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+							  .getContext()
+							  .getLangRequestFromRequest(routingContext.request()))
 				.find(method, helper.getFilterFromRequest(), helper.getModifierFromRequest())
 				.success(data -> { 
 					helper.end(HttpResponseStatus.OK, data);
@@ -63,6 +66,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+						  .getContext()
+						  .getLangRequestFromRequest(routingContext.request()))
 				.get(method, new Params().addParam(metadata.idPropertyName()
 								, helper.getRequestIdParam()))
 				.success(data -> { 
@@ -77,6 +83,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+						  .getContext()
+						  .getLangRequestFromRequest(routingContext.request()))
 				.find(method, helper.getFilterFromRequest(), helper.getModifierFromRequest())
 				.success(data -> { 
 					helper.end(HttpResponseStatus.OK, data);
@@ -95,6 +104,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);			
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+						  .getContext()
+						  .getLangRequestFromRequest(routingContext.request()))
 				.insert(method, helper.getRequestResourceObject())
 				.success(data -> { 
 					helper.end(HttpResponseStatus.CREATED, data);
@@ -108,6 +120,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);									   
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+						  .getContext()
+						  .getLangRequestFromRequest(routingContext.request()))
 				.insert(method, helper.getRequestResourceObject(), helper.getParamsFromRequest())
 				.success(data -> { 
 					helper.end(HttpResponseStatus.CREATED, data);
@@ -127,6 +142,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);		
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+						  .getContext()
+						  .getLangRequestFromRequest(routingContext.request()))
 				.update(method, metadata.setObjectId(
 									helper.getRequestResourceObject(), helper.getRequestIdParam()))
 				.success(data -> { 
@@ -141,6 +159,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);		
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+						  .getContext()
+						  .getLangRequestFromRequest(routingContext.request()))
 				.update(method, metadata.setObjectId(helper.getRequestResourceObject(), 
 									helper.getRequestIdParam()), helper.getParamsFromRequest())
 				.success(data -> { 
@@ -160,6 +181,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 			ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);		
 			helper.logRequest(method)
 			.service()
+			.withLang(metadata.restflow()
+					  .getContext()
+					  .getLangRequestFromRequest(routingContext.request()))
 			.partialUpdate(method, metadata.setObjectId(helper.getRequestResourceObject(), 
 															helper.getRequestIdParam()),
 							helper.getParamsFromRequest())
@@ -177,7 +201,11 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 		if(RestflowHttpMethod.DELETE_WITH_ID.equalValue(method.getUrl())) {
 			route.httpMethod(RestflowHttpMethod.DELETE_WITH_ID, routingContext -> {
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);	
-				final ResourceService<T> service = helper.logRequest(method).service();
+				final ResourceService<T> service = helper.logRequest(method)
+														.service()
+														.withLang(metadata.restflow()
+																  .getContext()
+																  .getLangRequestFromRequest(routingContext.request()));
 				service.get(helper.getRequestIdParam())
 				.success(object -> {
 					service.delete(helper.getRequestIdParam())
@@ -197,6 +225,9 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);		
 				helper.logRequest(method)
 				.service()
+				.withLang(metadata.restflow()
+						  .getContext()
+						  .getLangRequestFromRequest(routingContext.request()))
 				.delete(method, helper.getParamsFromRequest())
 				.success(v -> { 
 					helper.end(HttpResponseStatus.OK);

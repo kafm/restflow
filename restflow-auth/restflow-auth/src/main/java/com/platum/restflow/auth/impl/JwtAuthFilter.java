@@ -16,7 +16,7 @@ import io.vertx.ext.web.RoutingContext;
 @UseAuthFilter
 public class JwtAuthFilter implements AuthFilter {
 
-	private static JwtResolver jwtResolver;
+	protected static JwtResolver jwtResolver;
 		
 	@Override
 	public void config(Properties properties) {
@@ -26,22 +26,25 @@ public class JwtAuthFilter implements AuthFilter {
 	@Override
 	public void filter(ResourceMethod method, RoutingContext context) {
 		String token = context.request().getHeader(AUTH_HEADER);
-		if(method != null && 
-				(method.hasRoles() || method.isAuthRequired())) {
-			if(StringUtils.isEmpty(token)) {
-				throw new RestflowUnauthorizedException();
-			} else {
-				try {
-					ResourceObject object = jwtResolver.decode(token);
-					if(!hasPermission(method, getRolesFromObject(object))) {
-						throw new RestflowForbiddenException();
-					}
-					context.put(AUTH_HEADER, object);
-				} catch(Throwable e) {
-					throw new RestflowUnauthorizedException(e);
-				}
+		boolean requiredToken = method != null && (method.hasRoles() || method.isAuthRequired());
+		if(StringUtils.isNotEmpty(token)) {
+			ResourceObject object = getObjectFromToken(token);
+			context.put(AUTH_HEADER, object);
+			if(requiredToken && 
+					!hasPermission(method, getRolesFromObject(object))) {
+				throw new RestflowForbiddenException();
 			}
-		} 
+		} else if(requiredToken) {
+			throw new RestflowUnauthorizedException();
+		}
+	}
+
+	protected ResourceObject getObjectFromToken(String token) {
+		try {
+			return jwtResolver.decode(token);
+		} catch(Throwable e) {
+			throw new RestflowUnauthorizedException("Invalid token provided.", e);
+		}
 	}
 
 }

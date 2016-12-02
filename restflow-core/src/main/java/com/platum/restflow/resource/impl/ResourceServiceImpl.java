@@ -45,6 +45,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	
 	private RepositoryTransaction<?> transaction;
 	
+	private String lang;
+	
 	public ResourceServiceImpl(ResourceMetadata<T> resourceMetadata) {
 		super(resourceMetadata);
 		this.repository = ResourceFactory.getRespositoryInstance(resourceMetadata);
@@ -87,7 +89,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				future.complete(object);
 			} else {
 				hook.invoke(new ObjectContextImpl<T>(
-						metadata.resource(), this, object))
+						metadata.resource(), this, object)
+						.lang(lang))
 				.success(prunnedObj -> future.complete(prunnedObj))
 				.error(error -> future.fail(error));
 			}
@@ -218,6 +221,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		return save(method, new ObjectContextImpl<T>(
 								 	metadata.resource(), this, object, params)
 									.contextMethod(method)
+									.lang(lang)
 									.isNew(true));
 	}
 
@@ -242,6 +246,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		return save(method, new ObjectContextImpl<T>(
 								 	metadata.resource(), this, object, params)
 									.contextMethod(method)
+									.lang(lang)
 									.isNew(false));
 	}
 	
@@ -256,6 +261,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		return save(method, new ObjectContextImpl<T>(
 			 	metadata.resource(), this, object, params)
 				.contextMethod(method)
+				.lang(lang)
 				.isNew(false)
 				.partial(true), true);
 	}
@@ -300,7 +306,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	public Promise<Void> delete(ResourceMethod method, T object) {
 		assertValidMethod(method);
 		return destroy(method, new ObjectContextImpl<T>(
-								 	metadata.resource(), this, object));
+								 	metadata.resource(), this, object)
+									.lang(lang));
 	}
 
 	@Override
@@ -331,6 +338,17 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public RepositoryTransaction<?> transaction() {
 		return transaction;
+	}
+	
+	@Override
+	public ResourceService<T> withLang(String lang) {
+		this.lang = lang;
+		return this;
+	}
+	
+	@Override
+	public String lang() {
+		return lang;
 	}
 
 	@Override
@@ -444,7 +462,9 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 						T resObj = null;
 						if(!objContext.ignore()) {
 							resObj = save(method, object, objContext.isNew());
-						} 
+						} else {
+							resObj = res.result();
+						}
 						if(transaction != null && selfTransaction) {
 							transaction.commit();
 						}

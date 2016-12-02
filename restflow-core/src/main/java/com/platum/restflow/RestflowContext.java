@@ -90,5 +90,31 @@ public class RestflowContext {
 		}
 		return StringUtils.isEmpty(msg) ? e.getMessage() : msg;
 	}
+	
+	public String getLangMessage(String message, String langRequest, Object... params) {
+		String msg = null;
+		if(StringUtils.isEmpty(langRequest)) {
+			msg = messageProvider.getMessage(message, params);
+		} else {
+			try {
+				List<LanguageRange> langs = Locale.LanguageRange.parse(langRequest);
+				for(LanguageRange lang : langs) {
+					msg = messageProvider.getMessage(message, 
+							Locale.forLanguageTag(lang.getRange()), params);
+					if(StringUtils.isNotEmpty(msg)) {
+						if(logger.isDebugEnabled()) {
+							logger.debug("Message from locale: "+msg);
+						}
+						break;
+					}
+				}				
+			} catch(Throwable ex) {
+				if(logger.isWarnEnabled()) {
+					logger.warn("Unable to convert message to locale due to exception.", ex);
+				}
+			}
+		}
+		return StringUtils.isEmpty(msg) ? message : msg;
+	}
 
 }
