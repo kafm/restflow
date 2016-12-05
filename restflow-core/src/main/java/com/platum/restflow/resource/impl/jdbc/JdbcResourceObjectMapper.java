@@ -97,7 +97,7 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 				value = rs.getBigDecimal(column);
 				break;					
 			case DATE:
-				value = rs.getDate(column);
+				value = rs.getString(column);
 				break;
 			default:
 				value = rs.getString(column);
