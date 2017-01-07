@@ -56,6 +56,9 @@ public class RestflowVertxStarter {
 		Integer port = environment.getProperty(RestflowEnvironment.HTTP_PORT_PROPERTY, Integer.class);
 		HttpServerOptions httpOptions = new HttpServerOptions()
 										.setPort(port == null ? DEFAULT_SERVER_PORT : port);
+		String maxHeaderSize = environment.getProperty(RestflowEnvironment.HTTP_MAX_HEADER_SIZE);
+		httpOptions.setMaxHeaderSize(StringUtils.isEmpty(maxHeaderSize)?
+										16384: Integer.parseInt(maxHeaderSize));
 		if(httpSslEnabled) {
 			boolean alpnEnabled =  BooleanUtils.toBoolean(
 					environment.getProperty(RestflowEnvironment.HTTP_SSL_ALPN_PROPERTY));		

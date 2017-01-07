@@ -225,7 +225,7 @@ public class Resource implements Serializable {
 		return fileSystem;
 	}
 	
-	public Resource getFileSystem(String fileSystem) {
+	public Resource setFileSystem(String fileSystem) {
 		this.fileSystem = fileSystem;
 		return this;
 	} 

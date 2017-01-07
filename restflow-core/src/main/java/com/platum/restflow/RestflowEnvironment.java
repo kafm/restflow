@@ -72,6 +72,8 @@ public interface RestflowEnvironment {
 	
 	static final String HTTP_SSL_ALPN_PROPERTY = "restflow.http.ssl.alpn";
 
+	static final String HTTP_MAX_HEADER_SIZE = "restflow.http.header.size";
+
 	String getProperty(String property);
 	
 	<T> T getProperty(String property, Class<?> clazz);
