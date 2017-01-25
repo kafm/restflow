@@ -34,6 +34,13 @@ public class Params {
 			this.params.putAll(params.params);	
 		}
 	}
+	
+	public boolean containsKey(String key) {
+		if(params != null && !params.isEmpty()) {
+			return params.containsKey(key);
+		}
+		return false;
+	}
 
 	public Object size() {
 		return params.size();

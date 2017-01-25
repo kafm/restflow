@@ -1,11 +1,17 @@
 package com.platum.restflow.resource.impl.jdbc;
 
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +22,7 @@ import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceMetadata;
 import com.platum.restflow.resource.ResourceObject;
 import com.platum.restflow.resource.property.ResourceProperty;
+import com.platum.restflow.resource.property.ResourcePropertyValidator;
 import com.platum.restflow.resource.query.QueryField;
 import com.platum.restflow.utils.ClassUtils;
 
@@ -65,7 +72,7 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 			return;
 		} else if(fields != null && fields.length > 0) {
 			QueryField field = Stream.of(fields)
-								.filter(f -> f.toStringRepresentation().equals(column))
+								.filter(f -> f.toStringRepresentation().equalsIgnoreCase(column))
 								.findAny()
 								.orElse(null);
 			if(field != null) {
@@ -97,7 +104,14 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 				value = rs.getBigDecimal(column);
 				break;					
 			case DATE:
-				value = rs.getString(column);
+				Timestamp timestamp = rs.getTimestamp(column);
+				if(timestamp != null) {
+					String formatStr = StringUtils.isEmpty(property.getFormat())?
+									ResourcePropertyValidator.DEFAULT_DATE_FORMAT :
+									property.getFormat();
+					SimpleDateFormat format = new SimpleDateFormat(formatStr);
+					value = format.format(timestamp);
+				}
 				break;
 			default:
 				value = rs.getString(column);

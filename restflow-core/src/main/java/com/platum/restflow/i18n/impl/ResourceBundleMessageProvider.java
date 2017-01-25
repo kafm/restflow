@@ -138,7 +138,7 @@ public class ResourceBundleMessageProvider implements MessageProvider {
 			if(classLoader == null) {
 				classLoader = ClassUtils.getDefaultClassLoader();
 			}
-			return ResourceBundle.getBundle(baseName, locale, classLoader);
+			return ResourceBundle.getBundle(baseName, locale, classLoader, new UTF8Control());
 		}
 		catch(Throwable e) {
 			if(locale == Locale.ROOT) {

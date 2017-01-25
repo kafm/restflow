@@ -37,7 +37,8 @@ public class ResourceFactory {
 	}
 	
 	public static <T> ResourceService<T> getServiceInstance(Restflow restflow, Resource resource) {
-		return getServiceInstance(getResourceMetadataInstance(restflow, resource));
+		ResourceMetadata<T> metadata = getResourceMetadataInstance(restflow, resource);
+		return getServiceInstance(metadata);
 	}
 		
 	@SuppressWarnings("unchecked")

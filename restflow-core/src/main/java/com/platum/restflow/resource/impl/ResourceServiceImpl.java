@@ -123,17 +123,25 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	public Promise<List<ResourceObject>> find(ResourceMethod method, QueryFilter filter) {
 		return find(method, filter, null);
 	}
-
-	@SuppressWarnings("unchecked")
+	
 	@Override
 	public Promise<List<ResourceObject>> find(ResourceMethod method, QueryFilter filter, QueryModifier modifier) {
+		return find(method, filter, modifier, null);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Promise<List<ResourceObject>> find(ResourceMethod method, QueryFilter filter, QueryModifier modifier, Params params) {
 		Promise<List<ResourceObject>> promise = PromiseFactory.getPromiseInstance();
 		vertx.executeBlocking(future -> {
 			assertValidMethod(method);
 			QueryBuilder builder = metadata.getQueryBuilderInstance();
 			builder.method(method)
-			 	   .wrapIfAllowed()
-				   .completeQueryWithFilter(filter)
+			 	   .wrapIfAllowed();
+			if(params != null && !params.isEmpty()) {
+				builder.params(params);
+			}
+			builder.completeQueryWithFilter(filter)
 				   .completeQueryWithModifier(modifier);
 			List<ResourceObject> res = null;
 			if(modifier != null) {
@@ -149,7 +157,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				promise.reject(result.cause());
 			}
 		});
-		return promise;
+		return promise;		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -437,13 +445,14 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	private Promise<T> save(ResourceMethod method, ObjectContext<T> objContext, boolean partial) {
 		Promise<T> promise = PromiseFactory.getPromiseInstance();
 		final boolean isNew = objContext.isNew();
+		Params extParams = objContext.params();
 		vertx.executeBlocking(future -> {
 			final T object = objContext.object();
 			ResourcePropertyValidator.validate(metadata.resource().getProperties(), 
 					object, metadata.resourceClass(), partial);
 			HookInterceptor hook = getHook(HookType.SAVE, object);
 			if(hook == null) {
-				T resObj = save(method, object, isNew);
+				T resObj = save(method, object, isNew, extParams);
 				future.complete(resObj);
 			} else {
 				boolean selfTransaction = this.transaction == null;
@@ -461,7 +470,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 					if(res.succeeded()) {
 						T resObj = null;
 						if(!objContext.ignore()) {
-							resObj = save(method, object, objContext.isNew());
+							resObj = save(method, object, objContext.isNew(), extParams);
 						} else {
 							resObj = res.result();
 						}
@@ -487,11 +496,11 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		return promise;
 	}
 
-	private T save(ResourceMethod method, T object, boolean isNew) {
+	private T save(ResourceMethod method, T object, boolean isNew, Params params) {
 		if(isNew) {
-			return repository.insert(method, object);	
+			return repository.insert(method, object, params);	
 		} else {
-			return repository.update(method, object);
+			return repository.update(method, object, params);
 		}
 	}
 	

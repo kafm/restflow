@@ -29,6 +29,8 @@ public interface ResourceService<T> extends ResourceComponent<T> {
 	
 	Promise<List<ResourceObject>> find(ResourceMethod method, QueryFilter filter, QueryModifier modifier);
 	
+	Promise<List<ResourceObject>> find(ResourceMethod method, QueryFilter filter, QueryModifier modifier, Params params);
+	
 	Promise<Long> count(QueryFilter filter);
 	
 	Promise<Long> count(ResourceMethod method, QueryFilter filter);

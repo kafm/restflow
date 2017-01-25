@@ -194,7 +194,7 @@ public class Resource implements Serializable {
 		return null;
 	}
 	
-	public Resource setMethod(ResourceMethod method) {
+	public Resource addMethod(ResourceMethod method) {
 		if(method != null) {
 			if(methods == null) {
 				methods = new ArrayList<>();

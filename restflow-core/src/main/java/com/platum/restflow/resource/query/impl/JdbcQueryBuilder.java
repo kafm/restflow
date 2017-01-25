@@ -391,7 +391,7 @@ public class JdbcQueryBuilder implements QueryBuilder {
 			String from = " FROM ";
 			int fromIndex = method.getQuery().toUpperCase().indexOf(from) + from.length();
 			query.append(from).append(method.getQuery().substring(fromIndex, length));
-			if (groupBy.length() > 0) {
+			if (groupBy.length() > 0 && containsAggr) {
 				query.append(" GROUP BY ").append(groupBy.toString());
 			}
 			method.setQuery(query.toString());

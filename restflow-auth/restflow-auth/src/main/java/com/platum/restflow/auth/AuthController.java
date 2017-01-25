@@ -47,6 +47,8 @@ public class AuthController implements Controller {
 	
 	public static final String USER_INFO_METHOD = "userInfo";
 	
+	public static final String CHANGE_AVATAR_METHOD = "changeAvatar";
+	
 	public static final String CHANGE_AVATAR_URL = "POST /avatar/upload";
 	
 	public static final String REVOKE_METHOD = "revoke";
@@ -254,8 +256,12 @@ public class AuthController implements Controller {
 	private void publishChangeAvatar() {
 		UploadMethod method = authResource.getUpload();
 		if(method != null && method.isActive() && fileSystem != null) {
+			ResourceMethod avatarMethod = authResource.getMethod(CHANGE_AVATAR_METHOD);
 			String idProperty = authResource.getIdProperty();
-			String url = RestflowHttpMethod.POST.parseUrl(CHANGE_AVATAR_URL);
+			String url = avatarMethod != null 
+							&& StringUtils.isNotEmpty(avatarMethod.getUrl())?
+							RestflowHttpMethod.POST.parseUrl(avatarMethod.getUrl()) :
+							RestflowHttpMethod.POST.parseUrl(CHANGE_AVATAR_URL);
 			router.post(url)
 			.handler(routingContext -> {
 				if(logger.isInfoEnabled()) {
@@ -295,7 +301,7 @@ public class AuthController implements Controller {
 				});			
 			});	
 			if(logger.isInfoEnabled()) {
-				logger.info("Change avatar method with url "+CHANGE_AVATAR_URL+" deployed.");
+				logger.info("Change avatar method with url "+url+" deployed.");
 			}
 		}
 	}

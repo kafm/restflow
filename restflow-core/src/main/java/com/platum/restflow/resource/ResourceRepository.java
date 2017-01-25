@@ -17,6 +17,10 @@ public interface ResourceRepository<T> extends ResourceComponent<T> {
 	T insert(ResourceMethod method, T object);
 	
 	T update(ResourceMethod method, T object);
+	
+	T insert(ResourceMethod method, T object, Params params);
+	
+	T update(ResourceMethod method, T object, Params params);
 		
 	void delete(ResourceMethod method, T object);
 	
