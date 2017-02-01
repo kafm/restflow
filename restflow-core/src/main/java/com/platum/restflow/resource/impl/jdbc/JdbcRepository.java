@@ -356,8 +356,9 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 			paramsMap.entrySet().stream()
 			.forEach(param -> {
 				String key = param.getKey();
-				if(!usedParams.containsKey(key)) {
-					Object value = param.getValue();
+				Object value = param.getValue();
+				Object currValue = usedParams.getParam(key);
+				if(value != null && currValue == null) {
 					query.addParameter(key, value);
 					usedParams.addParam(key, value);
 				}

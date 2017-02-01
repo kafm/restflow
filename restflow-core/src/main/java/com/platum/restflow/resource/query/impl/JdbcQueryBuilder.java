@@ -310,7 +310,7 @@ public class JdbcQueryBuilder implements QueryBuilder {
 					query.append(statement.getLeft().toString());
 					Params params = statement.getRight();
 					if (!params.isEmpty()) {
-						this.params = params;
+						this.params.merge(params);
 						//method.setParams(ArrayUtils.addAll(method.getParams(), params.getParamNames()));
 					}
 				}
@@ -435,12 +435,14 @@ public class JdbcQueryBuilder implements QueryBuilder {
 					throw new RestflowInvalidRequestException(
 							"Wrong Query provided. Invalid operation " + operation.name() + ".");
 				}
-				String propertyName = leftToken.toString();
-				String columnName = propertyName;
-				ResourceProperty property = resource.getProperty(leftToken.toString());
+				String columnName = leftToken.toString();
+				String propertyName = columnName;
+				ResourceProperty property = resource.getProperty(propertyName);
 				if (property != null) {
 					propertyName = property.getName();
 					columnName = property.getColumn();
+				} else {
+					propertyName = propertyName.replaceAll("[^A-Za-z0-9_-]", "");
 				}
 				String[] paramNames = method.getParams();
 				Params params = new Params();

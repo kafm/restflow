@@ -21,6 +21,10 @@ public class Params {
 		return this;
 	}
 	
+	public Object getParam(String param) {
+		return params.get(param);
+	}
+	
 	public boolean isEmpty() {
 		return params.isEmpty();
 	}

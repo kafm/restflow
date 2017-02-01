@@ -12,17 +12,13 @@ public class SortModifier {
 		SortModifier sort = null;
 		if(StringUtils.isNotEmpty(sortString)) {
 			sort  = new SortModifier();
-			System.out.println(sortString);
 			if(sortString.startsWith("\\+")) { //ASC
-				System.out.println("ASC");
 				sort.field(sortString.substring(1))
 					.order(SortOrder.ASC);
 			} else if(sortString.startsWith("-")) { //DESC
-				System.out.println("AQUI");
 				sort.field(sortString.substring(1))
 				.order(SortOrder.DESC);				
 			} else {
-				System.out.println("HERE");
 				sort.field(sortString)
 				.order(SortOrder.ASC);	
 			}

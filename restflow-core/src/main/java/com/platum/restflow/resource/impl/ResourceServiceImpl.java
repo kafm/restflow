@@ -466,23 +466,33 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				hookContext = true;
 				hook.invoke(objContext)
 				.allways(res -> {
+					T resObj = null;
+					Throwable error = null;
 					hookContext = false;
-					if(res.succeeded()) {
-						T resObj = null;
-						if(!objContext.ignore()) {
-							resObj = save(method, object, objContext.isNew(), extParams);
+					try {
+						if(res.succeeded()) {
+							if(!objContext.ignore()) {
+								resObj = save(method, object, objContext.isNew(), extParams);
+							} else {
+								resObj = res.result();
+							}
 						} else {
-							resObj = res.result();
+							error = res.cause();
+						}						
+					} catch(Throwable e) {
+						error = e;
+					} finally {
+						if(error == null) {
+							if(transaction != null && selfTransaction) {
+								transaction.commit();
+							}
+							future.complete(resObj);
+						} else {
+							if(transaction != null && selfTransaction) {
+								transaction.rollback();
+							}
+							future.fail(error);
 						}
-						if(transaction != null && selfTransaction) {
-							transaction.commit();
-						}
-						future.complete(resObj);
-					} else {
-						if(transaction != null && selfTransaction) {
-							transaction.rollback();
-						}
-						future.fail(res.cause());
 					}
 				});
 			}

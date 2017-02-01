@@ -84,7 +84,11 @@ public class PromiseImpl<T>  implements Promise<T>{
 	private void processSuccess(T result) {
 		promiseResult = new PromiseResult<T>(result);
 		if(successHandler != null) {
-			successHandler.handle(result);
+			try {
+				successHandler.handle(result);
+			} catch(Throwable e) {
+				processFailure(e);
+			}
 		}
 	}
 	
