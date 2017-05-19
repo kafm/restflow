@@ -97,18 +97,26 @@ public class ResourceHttpHelper<T> {
 	}
 	
 	public QueryFilter getFilterFromRequest() {
-		String query = context.request().getParam(QUERY_REQUEST_PARAM);
-		if(query == null || !StringUtils.isNotEmpty(query)) {
-			return null;
-		}
-		return QueryFilter.fromJson(query);
+		return getFilterFromRequest(context);
 	}
 
 	public QueryModifier getModifierFromRequest() {
+		return getModifierFromRequest(context);
+	}
+	
+	public static QueryFilter getFilterFromRequest(RoutingContext context) {
+		String query = context.request().getParam(QUERY_REQUEST_PARAM);
+		if(query == null || StringUtils.isEmpty(query)) {
+			return null;
+		}
+		return QueryFilter.fromJson(query);		
+	}
+	
+	public static QueryModifier getModifierFromRequest(RoutingContext context) {
 		HttpServerRequest request = context.request();
 		return QueryModifier.fromJson(request.getParam(FIELDS_REQUEST_PARAM),
 				request.getParam(SORT_REQUEST_PARAM), request.getParam(LIMIT_REQUEST_PARAM),
-				request.getParam(OFFSET_REQUEST_PARAM)) ;
+				request.getParam(OFFSET_REQUEST_PARAM));	
 	}
 	
 	public Params getParamsFromRequest() {

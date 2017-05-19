@@ -322,11 +322,18 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	public Promise<Void> batchUpdate(ResourceMethod method, List<T> objects) {
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
 		vertx.executeBlocking(future -> {
-			assertValidMethod(method);
-			if(objects != null && !objects.isEmpty()) {
-				repository.batchUpdate(method, objects);
+			logger.info("I'm here in batch wtf");
+			try {
+				assertValidMethod(method);
+				if(objects != null && !objects.isEmpty()) {
+					repository.batchUpdate(method, objects);
+				}
+				logger.info("ended batch operation with success...");
+				future.complete();		
+			} catch(Throwable e) {
+				logger.error("Batch operation failed", e);
+				future.fail(e);
 			}
-			future.complete();
 		}, result -> {
 			if(result.succeeded()) {
 				promise.resolve();

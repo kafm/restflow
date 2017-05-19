@@ -13,6 +13,7 @@ import com.platum.restflow.RestflowHttpMethod;
 import com.platum.restflow.RestflowRoute;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.resource.impl.AbstractResourceComponent;
+import com.platum.restflow.utils.promise.Promise;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.buffer.Buffer;
@@ -81,13 +82,17 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 		} else {
 			route.httpMethod(RestflowHttpMethod.GET, routingContext -> {
 				ResourceHttpHelper<T> helper = new ResourceHttpHelper<T>(metadata, routingContext);
-				helper.logRequest(method)
+				ResourceService<T> service = helper.logRequest(method)
 				.service()
 				.withLang(metadata.restflow()
 						  .getContext()
-						  .getLangRequestFromRequest(routingContext.request()))
-				.find(method, helper.getFilterFromRequest(), helper.getModifierFromRequest())
-				.success(data -> { 
+						  .getLangRequestFromRequest(routingContext.request()));
+				Params params = helper.getParamsFromRequest();
+				Promise<?> promise = method.isCollection() ?
+						service.find(method, helper.getFilterFromRequest(), 
+								helper.getModifierFromRequest(), params) : 
+						service.get(method, params);
+				promise.success(data -> { 
 					helper.end(HttpResponseStatus.OK, data);
 				})
 				.error(error -> {

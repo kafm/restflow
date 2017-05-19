@@ -163,8 +163,8 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> getList(String name) {
-		return (List<Map<String, Object>>) get(name);
+	public <T> List<T> getList(String name) {
+		return (List<T>) get(name);
 	}
 
 	public List<ResourceObject> getListOfObjects(String name, ResourceProperty idProperty) {
@@ -181,7 +181,7 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 		return objList;
 	}
 		
-	public ResourceObject setList(String name, List<Map<String, Object>> value) {
+	public <T> ResourceObject setList(String name, List<T> value) {
 		put(name, value);
 		return this;
 	}

@@ -34,6 +34,8 @@ public class ResourceProperty implements Serializable {
 
 	private boolean required;
 	
+	private boolean repeating;
+	
 	private String max;
 	
 	private String min;
@@ -97,6 +99,15 @@ public class ResourceProperty implements Serializable {
 		this.required = required;
 		return this;
 	}
+	
+	public boolean isRepeating() {
+		return repeating;
+	}
+
+	public ResourceProperty setRepeating(boolean repeating) {
+		this.repeating = repeating;
+		return this;
+	}
 
 	public String getMax() {
 		return max;
@@ -145,9 +156,10 @@ public class ResourceProperty implements Serializable {
 
 	@Override
 	public String toString() {
-		return "ResourseProperty [name=" + name + ", type=" + type + ", label=" + label + ", labelFromMessages="
-				+ labelFromMessages + ", column=" + column + ", required=" + required + ", max=" + max + ", min=" + min
-				+ ", pattern=" + pattern + ", precision=" + precision + ", format=" + format + "]";
+		return "ResourceProperty [name=" + name + ", type=" + type + ", label=" + label + ", labelFromMessages="
+				+ labelFromMessages + ", column=" + column + ", required=" + required + ", repeating=" + repeating
+				+ ", max=" + max + ", min=" + min + ", pattern=" + pattern + ", precision=" + precision + ", format="
+				+ format + "]";
 	}
 
 }

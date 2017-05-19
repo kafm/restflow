@@ -1,6 +1,9 @@
 package com.platum.restflow.resource.property;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +21,8 @@ import org.apache.commons.validator.routines.DateValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.IntegerValidator;
 import org.apache.commons.validator.routines.LongValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.platum.restflow.exceptions.InvalidCreditCardValidationException;
 import com.platum.restflow.exceptions.InvalidDateValidationException;
@@ -42,6 +47,8 @@ import com.platum.restflow.resource.ResourceObject;
 public class ResourcePropertyValidator {
 	
 	public static final String DEFAULT_DATE_FORMAT  = "yyyy-MM-dd HH:mm:ss";
+	
+	private static final Logger logger = LoggerFactory.getLogger(ResourcePropertyValidator.class);
 	
 	/**
 	 * Validates a {@link ResourceObject} object according to it's properties definition 
@@ -143,6 +150,62 @@ public class ResourcePropertyValidator {
 		} else {
 			return null;
 		}
+	}
+	
+	public static Object getRepositoryPropertyValue(ResourceProperty property, Object value) {
+		if(value != null) {
+			String valueStr = value.toString();
+			if(property == null || property.getType() == null) {
+				return value;
+			} else if(property.getType().equals(ResourcePropertyType.STRING)) {
+				return valueStr;
+			} else if(StringUtils.isNotEmpty(valueStr)) {
+				Object rValue = null;
+				switch (property.getType())
+				{	
+					case INTEGER:
+				    	rValue = value instanceof Integer ? value
+				    				: NumberUtils.createInteger(valueStr);
+				    	break;
+			    	case LONG:
+			    		rValue = value instanceof Long || value instanceof Integer ? value
+			    					: NumberUtils.createLong(valueStr);
+			    		break;
+			    	case DECIMAL:
+			    		rValue = value instanceof Number ? value
+			    					: NumberUtils.createBigDecimal(valueStr);
+			    		break;
+			    	case BOOLEAN:
+			    		rValue = value instanceof Boolean ? value
+			    					: BooleanUtils.toBoolean(valueStr);
+			    		break;
+			    	case DATE:
+			    		if(value instanceof Date) {
+			    			rValue = value;
+			    		} else {
+				    		String format = GenericValidator.isBlankOrNull(property.getFormat())? 
+									DEFAULT_DATE_FORMAT : property.getFormat();
+				    		DateFormat df = new SimpleDateFormat(format);	
+				    		try {
+				    			rValue = new Timestamp(df.parse(valueStr).getTime());
+							} catch (ParseException e) {
+								if(logger.isDebugEnabled()) {
+									logger.debug("Cannot parse value ["+value+"] to date using format "+format);
+								}
+							}
+			    		}
+			    		break;
+			    	default:
+			    		break;
+				}	
+				return rValue;
+			}
+		} else if(property != null 
+					&& property.getType() != null
+					&& property.getType().equals(ResourcePropertyType.BOOLEAN)) {
+			return false;
+		}
+		return null;
 	}
 	
 	public static Integer validateInteger(ResourceProperty property, String value) {

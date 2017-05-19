@@ -27,6 +27,8 @@ public class ResourceMethod extends AbstractMethod implements Serializable, Clon
 	
 	private boolean wrap;
 	
+	private boolean collection = true;
+	
 	@XmlTransient
 	private String[] params;
 
@@ -73,6 +75,14 @@ public class ResourceMethod extends AbstractMethod implements Serializable, Clon
 	public ResourceMethod setWrap(boolean wrap) {
 		this.wrap = wrap;
 		return this;
+	}
+
+	public boolean isCollection() {
+		return collection;
+	}
+
+	public void setCollection(boolean collection) {
+		this.collection = collection;
 	}
 
 	@Override

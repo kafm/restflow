@@ -22,6 +22,7 @@ import com.platum.restflow.resource.Params;
 import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceMethod;
 import com.platum.restflow.resource.property.ResourceProperty;
+import com.platum.restflow.resource.property.ResourcePropertyValidator;
 import com.platum.restflow.resource.query.QueryBuilder;
 import com.platum.restflow.resource.query.QueryField;
 import com.platum.restflow.resource.query.QueryFilter;
@@ -42,8 +43,6 @@ public class JdbcQueryBuilder implements QueryBuilder {
 	private boolean containsAggr = false;
 
 	private Pattern sortFieldPattern = Pattern.compile("[a-zA-Z0-9_]+");
-	
-	
 	
 	private static final Map<QueryOperation, String> sqlOperations = new ImmutableMap.Builder<QueryOperation, String>()
 			.put(QueryOperation.AND, "AND").put(QueryOperation.OR, "OR").put(QueryOperation.EQUAL, "=")
@@ -445,27 +444,40 @@ public class JdbcQueryBuilder implements QueryBuilder {
 					propertyName = propertyName.replaceAll("[^A-Za-z0-9_-]", "");
 				}
 				String[] paramNames = method.getParams();
-				Params params = new Params();
-				if (paramNames == null) {
-					propertyName = propertyName+"_"+0;
-					paramNames = new String[] { propertyName };
-				} else {
-					propertyName = propertyName+"_"+paramNames.length;
-					paramNames = ArrayUtils.add(paramNames, propertyName);
-				} 
-				params.addParam(propertyName, rightToken);
-				method.setParams(paramNames);
+				List<String> newParams = new ArrayList<>();
+				int curIndex = paramNames == null ? 0 : paramNames.length;
 				if(operation.equals(QueryOperation.IN) || operation.equals(QueryOperation.NOT_IN)) {
+					@SuppressWarnings("unchecked")
+					final List<Object> vals = rightToken instanceof List ? (List<Object>) rightToken :Arrays.asList(rightToken);
 					builder.append(columnName)
-							.append(op)
-							.append("(:")
-							.append(propertyName)
-							.append(")");
+					.append(op)
+					.append("(");
+					for(int i = 0; i < vals.size(); i++) {
+						Object val = vals.get(i);
+						if(i > 0) {
+							builder.append(",");
+							curIndex++;
+						}
+						String inPropertyName = propertyName+"_"+curIndex;
+						builder.append(":")
+							   .append(inPropertyName);
+						params.addParam(inPropertyName, 
+								ResourcePropertyValidator.getRepositoryPropertyValue(property, val));
+						newParams.add(inPropertyName);
+					}
+					builder.append(")");
 				} else {
+					propertyName = propertyName+"_"+curIndex;
 					builder.append(columnName)
 							.append(op).append(":")
 							.append(propertyName);
-				}
+					newParams.add(propertyName);
+					params.addParam(propertyName, 
+							ResourcePropertyValidator.getRepositoryPropertyValue(property, rightToken));
+				}			
+				method.setParams(paramNames == null ? newParams.toArray(new String[newParams.size()])
+													: ArrayUtils.addAll(paramNames, 
+														newParams.toArray(new String[newParams.size()])));
 				return new ImmutablePair<StringBuilder, Params>(builder, params);
 			}
 		} else {

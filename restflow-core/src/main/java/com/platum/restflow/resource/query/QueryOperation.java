@@ -20,23 +20,23 @@ public enum QueryOperation {
 	static
     {
 		Map<String, QueryOperation> map = Maps.newHashMap();
-		map.put("$and", AND);
-		map.put("$or", OR);
-		map.put("$eq", EQUAL);
-		map.put("$ne", NOT_EQUAL);
-		map.put("$gt", GREATER_THAN);
-		map.put("$gte", GREATER_THAN_OR_EQUAL);
-		map.put("$lt", LESS_THAN);
-		map.put("$lte", LESS_THAN_OR_EQUAL);
-		map.put("$li", LIKE);
-		map.put("$nl", NOT_LIKE); 
-		map.put("$in", IN);
-		map.put("$nin", NOT_IN); 		
-		map.put("$sum", SUM);
-		map.put("$min", MIN);
-		map.put("$max", MAX);
-		map.put("$avg", AVG);
-		map.put("$count", COUNT);
+			map.put("$and", AND);
+			map.put("$or", OR);
+			map.put("$eq", EQUAL);
+			map.put("$ne", NOT_EQUAL);
+			map.put("$gt", GREATER_THAN);
+			map.put("$gte", GREATER_THAN_OR_EQUAL);
+			map.put("$lt", LESS_THAN);
+			map.put("$lte", LESS_THAN_OR_EQUAL);
+			map.put("$li", LIKE);
+			map.put("$nl", NOT_LIKE); 
+			map.put("$in", IN);
+			map.put("$nin", NOT_IN); 		
+			map.put("$sum", SUM);
+			map.put("$min", MIN);
+			map.put("$max", MAX);
+			map.put("$avg", AVG);
+			map.put("$count", COUNT);
 		OPERATIONS = Collections.unmodifiableMap(map);
     }
 

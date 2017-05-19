@@ -12,7 +12,7 @@ public class SortModifier {
 		SortModifier sort = null;
 		if(StringUtils.isNotEmpty(sortString)) {
 			sort  = new SortModifier();
-			if(sortString.startsWith("\\+")) { //ASC
+			if(sortString.startsWith("+")) { //ASC
 				sort.field(sortString.substring(1))
 					.order(SortOrder.ASC);
 			} else if(sortString.startsWith("-")) { //DESC

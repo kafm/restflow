@@ -1,13 +1,15 @@
 package com.platum.restflow.resource.impl.jdbc;
 
 
+import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -90,7 +92,10 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 		
 	private void setValue(T object, ResourceProperty property, String column, ResultSet rs) throws SQLException {
 		Object value = null;
-		switch(property.getType()) {
+		if(property.isRepeating()) {
+			value = resolveRepeatingValue(property, column, rs);
+		} else {
+			switch(property.getType()) {
 			case BOOLEAN:
 				value = rs.getBoolean(column);
 				break;
@@ -101,20 +106,14 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 				value = rs.getLong(column);
 				break;
 			case DECIMAL:
-				value = rs.getBigDecimal(column);
+				value =  rs.getBigDecimal(column);
 				break;					
 			case DATE:
-				Timestamp timestamp = rs.getTimestamp(column);
-				if(timestamp != null) {
-					String formatStr = StringUtils.isEmpty(property.getFormat())?
-									ResourcePropertyValidator.DEFAULT_DATE_FORMAT :
-									property.getFormat();
-					SimpleDateFormat format = new SimpleDateFormat(formatStr);
-					value = format.format(timestamp);
-				}
+				value = timestampToDateString(rs.getTimestamp(column), property.getFormat());
 				break;
 			default:
 				value = rs.getString(column);
+			}			
 		}
 		if(value != null){
 			setValue(object, property.getName(), value);
@@ -134,6 +133,61 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 		}
 	}
 	
+	private Object resolveRepeatingValue(ResourceProperty property, String column, ResultSet rs) throws SQLException {
+		Array sqlArr = rs.getArray(column);
+		if(sqlArr != null) {
+			ResultSet rsArr = sqlArr.getResultSet();
+			switch(property.getType()) {
+			case BOOLEAN:
+				List<Boolean> booleanList = new ArrayList<>();
+				while(rsArr.next()) {
+					booleanList.add(rsArr.getBoolean(2));
+				}			
+				return booleanList;
+			case INTEGER:
+				List<Integer> integerList = new ArrayList<>();
+				while(rsArr.next()) {
+					integerList.add(rsArr.getInt(2));
+				}			
+				return integerList; 
+			case LONG:
+				List<Long> longList = new ArrayList<>();
+				while(rsArr.next()) {
+					longList.add(rsArr.getLong(2));
+				}			
+				return longList; 
+			case DECIMAL:
+				List<BigDecimal> decimalList = new ArrayList<>();
+				while(rsArr.next()) {
+					decimalList.add(rsArr.getBigDecimal(2));
+				}			
+				return decimalList; 				
+			case DATE:
+				List<String> dateList = new ArrayList<>();
+				while(rsArr.next()) {
+					dateList.add(timestampToDateString( rsArr.getTimestamp(2), property.getFormat()));
+				}			
+				return dateList;
+			default:
+				List<String> stringList = new ArrayList<>();
+				while(rsArr.next()) {
+					stringList.add(rsArr.getString(2));
+				}			
+				return stringList;
+			}			
+		}
+		return null;
+	}
+	
+	private String timestampToDateString(Timestamp timestamp, String format) {
+		if(timestamp != null) {
+			String formatStr = StringUtils.isEmpty(format)?
+							ResourcePropertyValidator.DEFAULT_DATE_FORMAT : format;
+			return new SimpleDateFormat(formatStr).format(timestamp);
+		}
+		return null;
+	}
+	
 	private ResourceProperty getProperty(String column) {
 		try {
 			return properties.stream()
@@ -147,5 +201,6 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 	private T  getObjectInstance() {
 		return ClassUtils.newInstance(clazz);
 	}
+
 
 }

@@ -33,7 +33,7 @@ public class QueryFilter {
 	
 	public static QueryFilter fromJson(String json) {
 		if(StringUtils.isEmpty(json)) {
-			return new QueryFilter();
+			return null;
 		}
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -47,7 +47,7 @@ public class QueryFilter {
 	
 	public static QueryFilter fromMap(Map<String, Object> map) {
 		if(map == null || map.isEmpty()) {
-			return new QueryFilter();
+			return null;
 		}
 		return fromMap(map, null);
 	}

@@ -223,17 +223,20 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 		}
 		try {
 			Query query = connection.createQuery(method.getQuery());
-			objects.stream().forEach(object -> {
+			for(T object : objects) {
 				addQueryParams(query,
 						method.getParams(), object, null)
-				.addToBatch();
-			});
+				.addToBatch();				
+			}
 			query.executeBatch();
 			if(txGenerated) {
 				trans.commit();
 				trans = null;
 			}
 		} catch(Throwable e) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("Batch operation failed", e);
+			}
 			throw jdbcClient.translateException(e);
 		} finally {
 			if(txGenerated && trans != null) {
