@@ -96,7 +96,10 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 		ResourceMetadata<T> metadata = service.metadata();
 		Resource resource = metadata.restflow()
 							.getResource(resourceName);
-		return ResourceFactory.getServiceInstance(metadata.restflow(), resource);
+		ResourceService<T> s =  ResourceFactory
+				 					.getServiceInstance(metadata.restflow(), resource);
+		s.authorization(service.authorization());
+		return s;
 	}
 
 	@Override

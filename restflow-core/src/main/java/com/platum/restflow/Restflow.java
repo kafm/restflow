@@ -277,6 +277,7 @@ public class Restflow extends RestflowDefaultConfig {
 			InputStream is = ResourceUtils.getInputStream(propertiesFileName);
 			if(is != null) {
 				environment.load(is);	
+				logger.debug("File ["+propertiesFileName+"] loaded.");
 			} else if(logger.isWarnEnabled()) {
 				logger.debug("File ["+propertiesFileName+"] does not exists.");
 			}
