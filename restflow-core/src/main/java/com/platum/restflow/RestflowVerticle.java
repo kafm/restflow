@@ -100,24 +100,24 @@ public class RestflowVerticle extends MicroserviceVerticle {
 	
 	protected Router resolveRouter() {
 		router = Router.router(vertx);
+		router.route().handler(CorsHandler.create("*")
+			      .allowedMethod(HttpMethod.GET)
+			      .allowedMethod(HttpMethod.POST)
+			      .allowedMethod(HttpMethod.PUT)
+			      .allowedMethod(HttpMethod.PATCH)
+			      .allowedMethod(HttpMethod.DELETE)
+			      .allowedMethod(HttpMethod.OPTIONS)
+			      .allowedHeader("Access-Control-Allow-Method")
+			      .allowedHeader("Access-Control-Allow-Origin")
+			      .allowedHeader("Access-Control-Allow-Credentials")
+			      .allowedHeader("Access-Control-Allow-Headers")
+			      .allowedHeader("X-Requested-With")
+			      .allowedHeader("Content-Type")
+			      .allowedHeader("Accept")
+			      .allowedHeader("enctype")
+			      .allowedHeader("Authorization"));
 		Table<String, String, Resource> resources = restflow.getAllResources();
 		if(!resources.isEmpty()) {
-			router.route().handler(CorsHandler.create("*")
-				      .allowedMethod(HttpMethod.GET)
-				      .allowedMethod(HttpMethod.POST)
-				      .allowedMethod(HttpMethod.PUT)
-				      .allowedMethod(HttpMethod.PATCH)
-				      .allowedMethod(HttpMethod.DELETE)
-				      .allowedMethod(HttpMethod.OPTIONS)
-				      .allowedHeader("Access-Control-Allow-Method")
-				      .allowedHeader("Access-Control-Allow-Origin")
-				      .allowedHeader("Access-Control-Allow-Credentials")
-				      .allowedHeader("Access-Control-Allow-Headers")
-				      .allowedHeader("X-Requested-With")
-				      .allowedHeader("Content-Type")
-				      .allowedHeader("Accept")
-				      .allowedHeader("enctype")
-				      .allowedHeader("Authorization"));
 			Set<String> resourceRowNames = resources.rowKeySet();
 			resourceRowNames.stream().forEach(resourceName -> {
 				Set<Entry<String, Resource>> versions = resources.row(resourceName).entrySet();

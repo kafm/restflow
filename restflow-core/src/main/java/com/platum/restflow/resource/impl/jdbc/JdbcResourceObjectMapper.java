@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -183,7 +183,7 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 		if(timestamp != null) {
 			String formatStr = StringUtils.isEmpty(format)?
 							ResourcePropertyValidator.DEFAULT_DATE_FORMAT : format;
-			return new SimpleDateFormat(formatStr).format(timestamp);
+			return new SimpleDateFormat(formatStr).format(new Date(timestamp.getTime()));
 		}
 		return null;
 	}

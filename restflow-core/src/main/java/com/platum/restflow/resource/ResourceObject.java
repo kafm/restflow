@@ -93,7 +93,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 			} else if(value instanceof Long) {
 				return((Long) value).intValue(); 
 			}
-		} 
+		}  else {
+			return 0;
+		}
 		return (Integer) value;
 	}
 	
@@ -102,7 +104,7 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 		return this;
 	}
 	
-	public long getLong(String name) {
+	public Long getLong(String name) {
 		Object value = get(name);
 		if(value != null) {
 			if(value instanceof String) {
@@ -110,6 +112,8 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 			} else if(value instanceof Integer) {
 				return ((Integer) value).longValue(); 
 			} 
+		} else {
+			return 0L;
 		}
 		return (Long) value;
 	}
