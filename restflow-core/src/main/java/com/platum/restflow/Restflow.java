@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -143,6 +144,14 @@ public class Restflow extends RestflowDefaultConfig {
 			throw new ResflowNotExistsException("Datasource ["+name+"] does not exists.");
 		}
 		return datasourceProperties;
+	}
+	
+	public Restflow addDatasource(DatasourceDetails... datasource) {
+		if(datasources == null) {
+			throw new ResflowNotExistsException("Datasources cannot be null at this point.");
+		}
+		loadDatasources(Arrays.asList(datasource));
+		return this;
 	}
 	
 	public FileSystemDetails getFileSystem(String name) {
