@@ -64,6 +64,7 @@ public class ResourceFactory {
 		String implClass = datasource.getImplClass();
 		if(implClass == null) {
 			implClass = JdbcRepository.class.getName();
+			datasource.setImplClass(implClass);
 		}
 		return (ResourceRepository<T>) 
 				getComponentInstance(ClassUtils.getClassByName(implClass), resourceMetadata);
