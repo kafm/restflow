@@ -75,4 +75,8 @@ public interface ResourceService<T> extends ResourceComponent<T> {
 	
 	Map<HookType, HookInterceptor> hooks();
 	
+	boolean inHookContext();
+	
+	ResourceService<T> inHookContext(boolean inContext);
+	
 }

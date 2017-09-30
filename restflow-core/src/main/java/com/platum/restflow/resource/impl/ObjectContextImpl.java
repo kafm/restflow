@@ -59,6 +59,7 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 	public void save(ResourceMethod method, PromiseHandler<PromiseResult<T>> handler) {
 		Promise<T> promise = null;
 		ResourceMethod m = method == null ? contextMethod : method;
+		service.inHookContext(true);
 		if(isNew) {
 			promise = service.insert(m, object);
 		} else if(partial) {
@@ -76,6 +77,7 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 
 	@Override
 	public void destroy(PromiseHandler<PromiseResult<Void>> handler) {
+		service.inHookContext(true);
 		service.delete(contextMethod, object)	
 		.allways(handler);
 	}
@@ -87,7 +89,11 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 
 	@Override
 	public ResourceService<T> service() {
-		return service;
+		ResourceService<T> contextService = ResourceFactory.getServiceInstance(service.metadata());
+		contextService.inHookContext(true)
+					  .authorization(service.authorization())
+					  .withTransation(service.transaction());
+		return contextService;
 	}
 	
 	@Override
@@ -98,7 +104,8 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 							.getResource(resourceName);
 		ResourceService<T> s =  ResourceFactory
 				 					.getServiceInstance(metadata.restflow(), resource);
-		s.authorization(service.authorization());
+		s.authorization(service.authorization())
+		 .withTransation(service.transaction());
 		return s;
 	}
 

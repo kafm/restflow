@@ -322,13 +322,11 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	public Promise<Void> batchUpdate(ResourceMethod method, List<T> objects) {
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
 		vertx.executeBlocking(future -> {
-			logger.info("I'm here in batch wtf");
 			try {
 				assertValidMethod(method);
 				if(objects != null && !objects.isEmpty()) {
 					repository.batchUpdate(method, objects);
 				}
-				logger.info("ended batch operation with success...");
 				future.complete();		
 			} catch(Throwable e) {
 				logger.error("Batch operation failed", e);
@@ -390,6 +388,17 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	}
 	
 	@Override
+	public boolean inHookContext() {
+		return hookContext;
+	}
+
+	@Override
+	public ResourceService<T> inHookContext(boolean inContext) {
+		hookContext = inContext;
+		return this;
+	}
+	
+	@Override
 	public void close() {
 		repository.close();
 		if(logger.isDebugEnabled()) {
@@ -414,10 +423,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				if(transaction != null) {
 						repository.withTransaction(transaction);
 				}
-				hookContext = true;
 				hook.invoke(objContext)
 				.allways(res -> {
-					hookContext = false;
 					if(res.succeeded()) {
 						if(!objContext.ignore()) {
 							repository.delete(method, object);
@@ -458,24 +465,17 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 			ResourcePropertyValidator.validate(metadata.resource().getProperties(), 
 					object, metadata.resourceClass(), partial);
 			HookInterceptor hook = getHook(HookType.SAVE, object);
+			boolean selfTransaction = this.transaction == null;
+			resolveTransation(hook);
 			if(hook == null) {
 				T resObj = save(method, object, isNew, extParams);
 				future.complete(resObj);
 			} else {
-				boolean selfTransaction = this.transaction == null;
-				final RepositoryTransaction<?> transaction
-						= hook.transactional() && repository.hasTransationSupport()
-						? this.transaction != null? this.transaction : repository.newTransaction() 
-						: null;
-				if(transaction != null) {
-					repository.withTransaction(transaction);
-				}
-				hookContext = true;
+				logger.info("Going to invoke hook on "+metadata.resource().getName());
 				hook.invoke(objContext)
 				.allways(res -> {
 					T resObj = null;
 					Throwable error = null;
-					hookContext = false;
 					try {
 						if(res.succeeded()) {
 							if(!objContext.ignore()) {
@@ -521,12 +521,23 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		}
 	}
 	
+	private void resolveTransation(HookInterceptor hook) {
+		if(transaction != null) {
+			repository.withTransaction(transaction);
+		} else if(hook != null &&
+					hook.transactional() && 
+						repository.hasTransationSupport()) {
+			transaction = repository.newTransaction();
+			repository.withTransaction(transaction);
+		}
+	}
+	
 	private void assertValidMethod(ResourceMethod method) {
 		if(method == null) {
 			throw new RestflowInvalidRequestException("Method cannot be null for request.");
 		}
 	}
-	
+		
 	private HookInterceptor getHook(HookType hookType, T object) {
 		return hooks == null || hookContext ? null : hooks.get(hookType);
 	}

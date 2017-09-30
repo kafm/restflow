@@ -250,11 +250,12 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 	@SuppressWarnings("unchecked")
 	@Override
 	public <E> RepositoryTransaction<E> newTransaction() {
-		if(logger.isInfoEnabled()) {
-			logger.info("Starting new transaction");
-		}
 		Connection connection = jdbcClient.template().beginTransaction();
-		return (RepositoryTransaction<E>) new JdbcTransation().connection(connection);		
+		RepositoryTransaction<Connection> transaction =  new JdbcTransation().connection(connection);
+		if(logger.isInfoEnabled()) {
+			logger.info("Transaction started at "+System.currentTimeMillis());
+		}
+		return  (RepositoryTransaction<E>) transaction;
 	}
 
 	@SuppressWarnings("unchecked")

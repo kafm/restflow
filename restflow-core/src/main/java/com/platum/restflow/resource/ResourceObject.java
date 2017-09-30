@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
@@ -25,10 +26,20 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 
 	private static final long serialVersionUID = -7357638347355290212L;
 	
+	private String uid;
+	
 	private String idProperty;
 	
 	private Class<?> idClass;
 	
+	public ResourceObject() {
+		uid = UUID.randomUUID().toString();
+	}
+	
+	public String getUid() {
+		return uid;
+	}
+
 	public <T> T convertToClass(Class<T> clazz) {
 		Validate.notNull(clazz, "Class cannot be null.");
 		T object = ClassUtils.newInstance(clazz);

@@ -20,12 +20,12 @@ public class PromiseFactory {
 		return new PromiseImpl<T>(future);
 	}
 	
-	public static Promise<List<PromiseResult<?>>> whenAll(List<Promise<?>> promises) {
-		Promise<List<PromiseResult<?>>> promise = getPromiseInstance();
+	public static <T> Promise<List<PromiseResult<T>>> whenAll(List<Promise<T>> promises) {
+		Promise<List<PromiseResult<T>>> promise = getPromiseInstance();
 		try {
 			Validate.notEmpty(promises, "Promise list is empty.");
 			int expectedRes = promises.size();
-			List<PromiseResult<?>> results = new ArrayList<>();
+			List<PromiseResult<T>> results = new ArrayList<>();
 			promises.stream().forEach(p -> {
 				p.allways(h -> {
 					results.add(h);

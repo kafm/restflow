@@ -10,6 +10,7 @@ import com.platum.restflow.RestflowContext;
 import com.platum.restflow.exceptions.ResflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.exceptions.RestflowForbiddenException;
+import com.platum.restflow.exceptions.RestflowListOfException;
 import com.platum.restflow.exceptions.RestflowNotAllowedException;
 import com.platum.restflow.exceptions.RestflowObjectValidationException;
 import com.platum.restflow.exceptions.RestflowUnauthorizedException;
@@ -47,7 +48,11 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 			code = HttpResponseStatus.METHOD_NOT_ALLOWED.code();
 		} else if(exception instanceof ResflowNotExistsException) {
 			code = HttpResponseStatus.BAD_REQUEST.code();
+		} else if(exception instanceof RestflowListOfException) {
+			code = HttpResponseStatus.BAD_REQUEST.code();
 		} else if(exception instanceof RestflowObjectValidationException) {
+			code = HttpResponseStatus.BAD_REQUEST.code();
+		} else if(exception instanceof RestflowException) {
 			code = HttpResponseStatus.BAD_REQUEST.code();
 		} else if(RestflowException.class.isAssignableFrom(exception.getClass())) {
 			code = HttpResponseStatus.BAD_REQUEST.code();
@@ -77,6 +82,15 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 				});
 			}
 			json.put("validationErrors", errors);
+		} else if(exception instanceof RestflowListOfException) {
+			List<Throwable> exceptions = ((RestflowListOfException) exception).getErrors();
+			List<String> errors = new ArrayList<>();
+			if(exceptions != null && exceptions.size() > 0) {
+				exceptions.stream().forEach(e -> {
+					errors.add(context.getLangMessage(e, langRequest));
+				});
+			}
+			json.put("validationErrors", errors);			
 		}
 		return json;		
 	}
