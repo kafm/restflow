@@ -31,6 +31,29 @@ import com.platum.restflow.resource.query.QueryOperation;
 import com.platum.restflow.resource.query.SortModifier;
 
 public class JdbcQueryBuilder implements QueryBuilder {
+	
+	private static final Map<QueryOperation, String> sqlOperations = new ImmutableMap.Builder<QueryOperation, String>()
+			.put(QueryOperation.AND, "AND").put(QueryOperation.OR, "OR").put(QueryOperation.EQUAL, "=")
+			.put(QueryOperation.NOT_EQUAL, "!=").put(QueryOperation.GREATER_THAN, ">")
+			.put(QueryOperation.GREATER_THAN_OR_EQUAL, ">=").put(QueryOperation.LESS_THAN, "<")
+			.put(QueryOperation.LESS_THAN_OR_EQUAL, "<=").put(QueryOperation.LIKE, " like ")
+			.put(QueryOperation.NOT_LIKE, " not like ").put(QueryOperation.IN, " in ")
+			.put(QueryOperation.NOT_IN, " not in ")
+			.put(QueryOperation.SUM, "sum(#)")
+			.put(QueryOperation.MIN, "min(#)")
+			.put(QueryOperation.MAX, "max(#)")
+			.put(QueryOperation.AVG, "avg(#)")
+			.put(QueryOperation.COUNT, "count(#)")
+			.put(QueryOperation.DAY, "extract(day from #)")
+			.put(QueryOperation.WEEK, "extract(week from #)")
+			.put(QueryOperation.MONTH, "extract(month from #)")
+			.put(QueryOperation.QUARTER, "extract(quarter from #)")
+			.put(QueryOperation.YEAR, "extract(year from #)")
+			.build();
+	
+	private static final List<String> dateOperations = Arrays.asList("day","week","month","quarter","year");
+	
+	private static final String FIELD_ALIAS = "#"; 
 
 	private ResourceMethod method;
 
@@ -43,15 +66,6 @@ public class JdbcQueryBuilder implements QueryBuilder {
 	private boolean containsAggr = false;
 
 	private Pattern sortFieldPattern = Pattern.compile("[a-zA-Z0-9_]+");
-	
-	private static final Map<QueryOperation, String> sqlOperations = new ImmutableMap.Builder<QueryOperation, String>()
-			.put(QueryOperation.AND, "AND").put(QueryOperation.OR, "OR").put(QueryOperation.EQUAL, "=")
-			.put(QueryOperation.NOT_EQUAL, "!=").put(QueryOperation.GREATER_THAN, ">")
-			.put(QueryOperation.GREATER_THAN_OR_EQUAL, ">=").put(QueryOperation.LESS_THAN, "<")
-			.put(QueryOperation.LESS_THAN_OR_EQUAL, "<=").put(QueryOperation.LIKE, " like ")
-			.put(QueryOperation.NOT_LIKE, " not like ").put(QueryOperation.IN, " in ")
-			.put(QueryOperation.NOT_IN, " not in ").put(QueryOperation.SUM, "sum").put(QueryOperation.MIN, "min")
-			.put(QueryOperation.MAX, "max").put(QueryOperation.AVG, "avg").put(QueryOperation.COUNT, "count").build();
 
 	@Override
 	public Params params() {
@@ -372,10 +386,18 @@ public class JdbcQueryBuilder implements QueryBuilder {
 					query.append(",");
 				}
 				if (field.measure() != null) {
-					query.append(sqlOperations.get(field.measure())).append("(")
-							.append(getColumnFromFieldName(field.field()))
-							.append(") AS " + field.toStringRepresentation());
-					if (!containsAggr) {
+					String fieldMeasure = sqlOperations
+											.get(field.measure())
+												.replace(FIELD_ALIAS, 
+														getColumnFromFieldName(field.field()));
+					query.append(fieldMeasure)
+							.append(" AS " + field.toStringRepresentation());
+					if(field.measure().isDate()) {
+						if (groupBy.length() > 0) {
+							groupBy.append(",");
+						}
+						groupBy.append(field.toStringRepresentation());						
+					} else if (!containsAggr) {
 						containsAggr = true;
 					}
 				} else {
@@ -515,6 +537,11 @@ public class JdbcQueryBuilder implements QueryBuilder {
 	private void assertMethodNotNull() {
 		if (method == null)
 			throw new RestflowException("Method cannot be null at this point.");
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("count(#)".replace("#", "abs"));
+		System.out.println(dateOperations.contains("year"));
 	}
 
 }

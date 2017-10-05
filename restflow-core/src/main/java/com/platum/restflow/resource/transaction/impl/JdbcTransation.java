@@ -25,20 +25,26 @@ public class JdbcTransation implements RepositoryTransaction<Connection> {
 
 	@Override
 	public void commit() {
-		if(logger.isInfoEnabled()) {
-			logger.info("Commiting transaction...");
+		try {
+			if(logger.isInfoEnabled()) {
+				logger.info("Commiting transaction...");
+			}
+			connection.commit();			
+		} finally {
+			connection.close();	
 		}
-		connection.commit();
-		connection.close();
 	}
 
 	@Override
 	public void rollback() {
-		if(logger.isInfoEnabled()) {
-			logger.info("Rolling back transaction...");
+		try {
+			if(logger.isInfoEnabled()) {
+				logger.info("Rolling back transaction...");
+			}
+			connection.rollback();	
+		} finally {
+			connection.close();	
 		}
-		connection.rollback();
-		connection.close();
 	}
 
 

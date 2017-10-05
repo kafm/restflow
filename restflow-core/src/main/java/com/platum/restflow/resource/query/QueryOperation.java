@@ -13,7 +13,8 @@ public enum QueryOperation {
 	GREATER_THAN, GREATER_THAN_OR_EQUAL,
 	LESS_THAN, LESS_THAN_OR_EQUAL,
 	LIKE, NOT_LIKE, IN, NOT_IN,
-	SUM, MIN, MAX, AVG, COUNT;
+	SUM, MIN, MAX, AVG, COUNT, 
+	DAY, WEEK, MONTH, QUARTER, YEAR;
 	
 	public static final Map<String, QueryOperation> OPERATIONS;
 	
@@ -37,6 +38,11 @@ public enum QueryOperation {
 			map.put("$max", MAX);
 			map.put("$avg", AVG);
 			map.put("$count", COUNT);
+			map.put("$day", DAY);
+			map.put("$week", WEEK);
+			map.put("$month", MONTH);
+			map.put("$quarter", QUARTER);
+			map.put("$year", YEAR);
 		OPERATIONS = Collections.unmodifiableMap(map);
     }
 
@@ -54,6 +60,12 @@ public enum QueryOperation {
     	return (this.equals(COUNT) || this.equals(SUM) 
     			|| this.equals(MIN)
     			|| this.equals(MAX) || this.equals(AVG));
+    }
+    
+    public boolean isDate() {
+    	return (this.equals(YEAR) || this.equals(QUARTER) 
+    			|| this.equals(MONTH)
+    			|| this.equals(WEEK) || this.equals(DAY));    	
     }
     
     public boolean isAndOr() {
