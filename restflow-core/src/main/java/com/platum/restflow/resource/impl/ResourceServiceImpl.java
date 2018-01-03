@@ -284,9 +284,9 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				 .method();
 		get(id).success(object -> {
 			delete(method, object)
-			.success(v -> {promise.resolve();})
-			.error(error -> {promise.reject(error);});
-		}).error(error -> {promise.reject(error);});
+			.success(v -> promise.resolve())
+			.error(promise::reject);
+		}).error(promise::reject);
 		return promise;
 	}
 	

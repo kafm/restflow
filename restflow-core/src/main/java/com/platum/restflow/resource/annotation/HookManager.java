@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -16,7 +18,11 @@ import com.platum.restflow.resource.ObjectContext;
 import com.platum.restflow.utils.promise.Promise;
 import com.platum.restflow.utils.promise.PromiseFactory;
 
+
+
 public class HookManager {
+
+	private final  Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private Table<String, HookType, HookInterceptor> hooks;
 	
@@ -74,6 +80,7 @@ public class HookManager {
 					HookType type = hookMetadata.on();
 					boolean transactional = hookMetadata.transactional();		
 					hooks.put(resource, type, new HookInterceptor(method, transactional));
+					logger.info("Hook for resource ["+resource+"] of type ["+type+"] deployed");
 				});
 			}			
 		}

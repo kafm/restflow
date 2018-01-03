@@ -331,20 +331,22 @@ public class Restflow extends RestflowDefaultConfig {
 	public void resolveResourceMethods(Resource resource) {
 		List<ResourceMethod> methods = resource.getMethods();
 		if(methods != null && !methods.isEmpty()) {
-			methods.stream().forEach(method -> {
-				String query = method.getQuery();
-				if(StringUtils.isNotEmpty(query)) {
-					Matcher matcher = paramPattern.matcher(query);
-					List<String> params = new ArrayList<>();
-			        while (matcher.find()) {
-			        	String param = matcher.group();
-			        	params.add(param.substring(1));
-			        }		
-			        if(!params.isEmpty()) {
-			        	method.setParams(params.toArray(new String[params.size()]));
-			        }
-				}
-			});
+			methods.stream().forEach(this::resolveResourceMethod);
+		}
+	}
+	
+	public void resolveResourceMethod(ResourceMethod method) {
+		String query = method.getQuery();
+		if(StringUtils.isNotEmpty(query)) {
+			Matcher matcher = paramPattern.matcher(query);
+			List<String> params = new ArrayList<>();
+	        while (matcher.find()) {
+	        	String param = matcher.group();
+	        	params.add(param.substring(1));
+	        }		
+	        if(!params.isEmpty()) {
+	        	method.setParams(params.toArray(new String[params.size()]));
+	        }
 		}
 	}
 	
