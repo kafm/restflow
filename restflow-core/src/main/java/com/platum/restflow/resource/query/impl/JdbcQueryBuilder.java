@@ -539,9 +539,4 @@ public class JdbcQueryBuilder implements QueryBuilder {
 			throw new RestflowException("Method cannot be null at this point.");
 	}
 	
-	public static void main(String[] args) {
-		System.out.println("count(#)".replace("#", "abs"));
-		System.out.println(dateOperations.contains("year"));
-	}
-
 }

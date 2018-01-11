@@ -84,6 +84,8 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 				setValue(object, label, rs.getObject(column));
 				return;
 			}
+		} else {
+			setValue(object, column, rs.getObject(column));
 		}
 		if(logger.isDebugEnabled()) {
 			logger.debug("No property match found for column "+column);
