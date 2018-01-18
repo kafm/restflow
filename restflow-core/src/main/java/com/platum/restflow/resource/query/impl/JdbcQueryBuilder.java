@@ -44,15 +44,16 @@ public class JdbcQueryBuilder implements QueryBuilder {
 			.put(QueryOperation.MAX, "max(#)")
 			.put(QueryOperation.AVG, "avg(#)")
 			.put(QueryOperation.COUNT, "count(#)")
-			.put(QueryOperation.COUNT_DISTINCT, "count(distinct #)")
-			.put(QueryOperation.PERCENT, "sum(#)/sum(#) over()")
-			.put(QueryOperation.PERCENT_COUNT, "count(#)/count(#) over()")
 			.put(QueryOperation.DAY, "extract(day from #)")
 			.put(QueryOperation.WEEK, "extract(week from #)")
 			.put(QueryOperation.MONTH, "extract(month from #)")
 			.put(QueryOperation.QUARTER, "extract(quarter from #)")
 			.put(QueryOperation.YEAR, "extract(year from #)")
 			.build();
+	/* TODO ADD FOLLOWING OPERATIONS
+	.put(QueryOperation.COUNT_DISTINCT, "count(distinct #)")
+	.put(QueryOperation.PERCENT, "sum(#)/sum(#) over()")
+	.put(QueryOperation.PERCENT_COUNT, "count(#)/count(#) over()")*/
 	
 	private static final String FIELD_ALIAS = "#"; 
 
