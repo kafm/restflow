@@ -32,7 +32,7 @@ import com.platum.restflow.resource.query.SortModifier;
 
 public class JdbcQueryBuilder implements QueryBuilder {
 	
-	private static final Map<QueryOperation, String> sqlOperations = new ImmutableMap.Builder<QueryOperation, String>()
+	public static final Map<QueryOperation, String> sqlOperations = new ImmutableMap.Builder<QueryOperation, String>()
 			.put(QueryOperation.AND, "AND").put(QueryOperation.OR, "OR").put(QueryOperation.EQUAL, "=")
 			.put(QueryOperation.NOT_EQUAL, "!=").put(QueryOperation.GREATER_THAN, ">")
 			.put(QueryOperation.GREATER_THAN_OR_EQUAL, ">=").put(QueryOperation.LESS_THAN, "<")
@@ -44,14 +44,15 @@ public class JdbcQueryBuilder implements QueryBuilder {
 			.put(QueryOperation.MAX, "max(#)")
 			.put(QueryOperation.AVG, "avg(#)")
 			.put(QueryOperation.COUNT, "count(#)")
+			.put(QueryOperation.COUNT_DISTINCT, "count(distinct #)")
+			.put(QueryOperation.PERCENT, "sum(#)/sum(#) over()")
+			.put(QueryOperation.PERCENT_COUNT, "count(#)/count(#) over()")
 			.put(QueryOperation.DAY, "extract(day from #)")
 			.put(QueryOperation.WEEK, "extract(week from #)")
 			.put(QueryOperation.MONTH, "extract(month from #)")
 			.put(QueryOperation.QUARTER, "extract(quarter from #)")
 			.put(QueryOperation.YEAR, "extract(year from #)")
 			.build();
-	
-	private static final List<String> dateOperations = Arrays.asList("day","week","month","quarter","year");
 	
 	private static final String FIELD_ALIAS = "#"; 
 

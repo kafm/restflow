@@ -7,13 +7,18 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Maps;
 
+/**
+ * TODO some operations only work for postgres
+ * 
+ * */
 public enum QueryOperation {
 	AND, OR, 
 	EQUAL, NOT_EQUAL, 
 	GREATER_THAN, GREATER_THAN_OR_EQUAL,
 	LESS_THAN, LESS_THAN_OR_EQUAL,
 	LIKE, NOT_LIKE, IN, NOT_IN,
-	SUM, MIN, MAX, AVG, COUNT, 
+	SUM, MIN, MAX, AVG, COUNT, COUNT_DISTINCT,
+	PERCENT, PERCENT_COUNT,
 	DAY, WEEK, MONTH, QUARTER, YEAR;
 	
 	public static final Map<String, QueryOperation> OPERATIONS;
@@ -38,6 +43,9 @@ public enum QueryOperation {
 			map.put("$max", MAX);
 			map.put("$avg", AVG);
 			map.put("$count", COUNT);
+			map.put("$count_distinct", COUNT_DISTINCT);
+			map.put("$percent", PERCENT);
+			map.put("$percent_count", PERCENT_COUNT);
 			map.put("$day", DAY);
 			map.put("$week", WEEK);
 			map.put("$month", MONTH);
@@ -57,9 +65,9 @@ public enum QueryOperation {
     }
     
     public boolean isAggregation() {
-    	return (this.equals(COUNT) || this.equals(SUM) 
-    			|| this.equals(MIN)
-    			|| this.equals(MAX) || this.equals(AVG));
+    	return (this.equals(COUNT) || this.equals(COUNT_DISTINCT)  || this.equals(SUM) ||
+    			this.equals(MIN) || this.equals(MAX) || this.equals(AVG) ||
+    			this.equals(PERCENT) || this.equals(PERCENT_COUNT));
     }
     
     public boolean isDate() {
