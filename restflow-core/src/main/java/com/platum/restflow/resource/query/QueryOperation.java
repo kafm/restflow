@@ -33,7 +33,8 @@ public enum QueryOperation {
 			map.put("$li", LIKE);
 			map.put("$nl", NOT_LIKE); 
 			map.put("$in", IN);
-			map.put("$nin", NOT_IN); 		
+			map.put("$nin", NOT_IN); 
+			map.put("$count", COUNT);
 			map.put("$sum", SUM);
 			map.put("$min", MIN);
 			map.put("$max", MAX);
