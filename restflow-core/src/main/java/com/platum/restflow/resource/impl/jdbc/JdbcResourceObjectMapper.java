@@ -137,8 +137,13 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 	
 	private Object resolveRepeatingValue(ResourceProperty property, String column, ResultSet rs) throws SQLException {
 		Array sqlArr = rs.getArray(column);
+		ResultSet rsArr = null;
 		if(sqlArr != null) {
-			ResultSet rsArr = sqlArr.getResultSet();
+			try {
+				rsArr =  sqlArr.getResultSet();
+			} catch(Throwable  e) {};
+		}
+		if(rsArr != null) {
 			switch(property.getType()) {
 			case BOOLEAN:
 				List<Boolean> booleanList = new ArrayList<>();

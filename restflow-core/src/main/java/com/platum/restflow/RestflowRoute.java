@@ -17,7 +17,6 @@ import io.vertx.core.Handler;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.BodyHandler;
 
 
 public class RestflowRoute {
@@ -84,13 +83,10 @@ public class RestflowRoute {
 	public Route getRoute(String url) {
 		Route route = null;
 		if(httpMethod.isPost()) {
-			router.route(url).handler(BodyHandler.create());
 			route = router.post(url);
 		} else if(httpMethod.isPut()) {
-			router.route(url).handler(BodyHandler.create());
 			route = router.put(url);
 		} else if(httpMethod.isPatch()) {
-			router.route(url).handler(BodyHandler.create());
 			route = router.patch(url);
 		} else if(httpMethod.isDelete()) {
 			route = router.delete(url);

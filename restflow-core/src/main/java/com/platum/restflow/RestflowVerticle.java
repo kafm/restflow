@@ -25,6 +25,7 @@ import com.platum.restflow.resource.query.QueryBuilder;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
@@ -100,6 +101,7 @@ public class RestflowVerticle extends MicroserviceVerticle {
 	
 	protected Router resolveRouter() {
 		router = Router.router(vertx);
+		router.route().handler(BodyHandler.create());
 		router.route().handler(CorsHandler.create("*")
 			      .allowedMethod(HttpMethod.GET)
 			      .allowedMethod(HttpMethod.POST)
