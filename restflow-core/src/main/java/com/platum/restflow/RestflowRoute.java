@@ -65,9 +65,13 @@ public class RestflowRoute {
 	
 	private void handleRoute(RoutingContext context) {
 		if(filters != null && !filters.isEmpty()) {
-			filters.stream().forEach(filter -> {
-				filter.filter(method, context);	
-			});
+			try {
+				filters.stream().forEach(filter -> {
+					filter.filter(method, context);	
+				});	
+			} catch(Throwable e) {
+				context.fail(e);
+			}
 		} else if(logger.isDebugEnabled()) {
 			logger.debug("No filter services found.");
 		}

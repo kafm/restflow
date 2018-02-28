@@ -101,7 +101,10 @@ public class RestflowVerticle extends MicroserviceVerticle {
 	
 	protected Router resolveRouter() {
 		router = Router.router(vertx);
-		router.route().handler(BodyHandler.create());
+		router.route()
+				.pathRegex(".*(?<!(upload))$")
+				.handler(BodyHandler.create());
+		router.route().failureHandler(ResourceFactory.getResourceFailureHandler(restflow.getContext()));
 		router.route().handler(CorsHandler.create("*")
 			      .allowedMethod(HttpMethod.GET)
 			      .allowedMethod(HttpMethod.POST)
@@ -134,7 +137,6 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			}
 			router.route(staticAssetsRoute).handler(StaticHandler.create(staticAssetsPath));
 		}
-		router.route().failureHandler(ResourceFactory.getResourceFailureHandler(restflow.getContext()));
 		publishControllerServices(router);
 		return router;
 	}

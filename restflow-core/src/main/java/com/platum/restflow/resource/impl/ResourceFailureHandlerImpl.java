@@ -37,6 +37,7 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 	@Override
 	public void handle(RoutingContext routingContext) {
 		Throwable exception = routingContext.failure();
+		exception.printStackTrace();
 		HttpServerResponse response = routingContext.response();
 		HttpServerRequest request = routingContext.request();
 		int code = 0; 
