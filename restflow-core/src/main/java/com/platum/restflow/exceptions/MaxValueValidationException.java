@@ -5,8 +5,6 @@ import com.platum.restflow.resource.property.ResourceProperty;
 @SuppressWarnings("serial")
 public class MaxValueValidationException extends RestflowValidationException {
 	
-	private ResourceProperty contextProperty;
-	
 	public MaxValueValidationException(String message) {
 		super(message);
 	}

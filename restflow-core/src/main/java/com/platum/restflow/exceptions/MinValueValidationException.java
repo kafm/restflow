@@ -4,9 +4,7 @@ import com.platum.restflow.resource.property.ResourceProperty;
 
 @SuppressWarnings("serial")
 public class MinValueValidationException extends RestflowValidationException {
-	
-	private ResourceProperty contextProperty;
-	
+
 	public MinValueValidationException(String message) {
 		super(message);
 	}

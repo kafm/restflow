@@ -2,6 +2,7 @@ package com.platum.restflow.resource.query.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -471,8 +472,12 @@ public class JdbcQueryBuilder implements QueryBuilder {
 				List<String> newParams = new ArrayList<>();
 				int curIndex = paramNames == null ? 0 : paramNames.length;
 				if(operation.equals(QueryOperation.IN) || operation.equals(QueryOperation.NOT_IN)) {
-					@SuppressWarnings("unchecked")
-					final List<Object> vals = rightToken instanceof List ? (List<Object>) rightToken :Arrays.asList(rightToken);
+					final List<Object> vals =  new ArrayList<>();
+					try {
+						vals.addAll((Collection<?>) rightToken);
+					} catch(Throwable e) {
+						vals.addAll(Arrays.asList(rightToken));
+					}
 					builder.append(columnName)
 					.append(op)
 					.append("(");
