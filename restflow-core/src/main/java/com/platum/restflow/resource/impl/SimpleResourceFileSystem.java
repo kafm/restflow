@@ -1,5 +1,7 @@
 package com.platum.restflow.resource.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -181,13 +183,20 @@ public class SimpleResourceFileSystem<T> extends AbstractResourceComponent<T>  i
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
 		vertx.fileSystem().open(path+FILE_METADATA, new OpenOptions(), ar -> {
 			if(ar.succeeded()) {
-				String json = Json.encode(new ResourceFile()
-						.fileName(file.fileName())
-						.setNew(false)
-						.resourceName(file.resourceName())
-						.id(file.id()));
-				ar.result().end(Buffer.buffer(json));	
-				promise.resolve();
+				Map<String, Object> metadata = new HashMap<>();
+				metadata.put("fileName", file.fileName());
+				metadata.put("new", file.isNew());
+				metadata.put("resourceName", file.resourceName());
+				metadata.put("id", file.id());
+				Buffer buffer = Json.encodeToBuffer(metadata);
+				ar.result().write(buffer, 0, res -> {
+					if(res.failed()) {
+						promise.reject(res.cause());
+					} else {
+						ar.result().end();
+						promise.resolve();
+					}
+				});
 			} else {
 				promise.reject(ar.cause());
 			}
@@ -247,7 +256,13 @@ public class SimpleResourceFileSystem<T> extends AbstractResourceComponent<T>  i
 	
 	private ResourceFile metadataToFileObject(Buffer metadataFile) {
 		Validate.notNull(metadataFile);
-		return Json.decodeValue(metadataFile.toString(), ResourceFile.class);
+		//return Json.decodeValue(metadataFile.toString(), ResourceFile.class);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> metadata = Json.decodeValue(metadataFile.toString(), HashMap.class);
+		return new ResourceFile()
+					.id(metadata.get("id"))
+					.fileName((String) metadata.get("fileName"))
+					.resourceName((String) metadata.get("resourceName"));
 	}
 	
 	private void config(FileSystemDetails fileSystem) {

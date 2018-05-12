@@ -24,6 +24,7 @@ import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceMetadata;
 import com.platum.restflow.resource.ResourceObject;
 import com.platum.restflow.resource.property.ResourceProperty;
+import com.platum.restflow.resource.property.ResourcePropertyType;
 import com.platum.restflow.resource.property.ResourcePropertyValidator;
 import com.platum.restflow.resource.query.QueryField;
 import com.platum.restflow.utils.ClassUtils;
@@ -97,25 +98,7 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 		if(property.isRepeating()) {
 			value = resolveRepeatingValue(property, column, rs);
 		} else {
-			switch(property.getType()) {
-			case BOOLEAN:
-				value = rs.getBoolean(column);
-				break;
-			case INTEGER:
-				value = rs.getInt(column);
-				break;
-			case LONG:
-				value = rs.getLong(column);
-				break;
-			case DECIMAL:
-				value =  rs.getBigDecimal(column);
-				break;					
-			case DATE:
-				value = timestampToDateString(rs.getTimestamp(column), property.getFormat());
-				break;
-			default:
-				value = rs.getString(column);
-			}			
+			value = getValue(property.getType(), property.getFormat(), column, rs);
 		}
 		if(value != null){
 			setValue(object, property.getName(), value);
@@ -141,49 +124,72 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 		if(sqlArr != null) {
 			try {
 				rsArr =  sqlArr.getResultSet();
-			} catch(Throwable  e) {};
+			} catch(Throwable  e) {
+				return getValue(property.getType(), property.getFormat(), column, rs);
+			};
 		}
 		if(rsArr != null) {
-			switch(property.getType()) {
-			case BOOLEAN:
-				List<Boolean> booleanList = new ArrayList<>();
-				while(rsArr.next()) {
-					booleanList.add(rsArr.getBoolean(2));
-				}			
-				return booleanList;
-			case INTEGER:
-				List<Integer> integerList = new ArrayList<>();
-				while(rsArr.next()) {
-					integerList.add(rsArr.getInt(2));
-				}			
-				return integerList; 
-			case LONG:
-				List<Long> longList = new ArrayList<>();
-				while(rsArr.next()) {
-					longList.add(rsArr.getLong(2));
-				}			
-				return longList; 
-			case DECIMAL:
-				List<BigDecimal> decimalList = new ArrayList<>();
-				while(rsArr.next()) {
-					decimalList.add(rsArr.getBigDecimal(2));
-				}			
-				return decimalList; 				
-			case DATE:
-				List<String> dateList = new ArrayList<>();
-				while(rsArr.next()) {
-					dateList.add(timestampToDateString( rsArr.getTimestamp(2), property.getFormat()));
-				}			
-				return dateList;
-			default:
-				List<String> stringList = new ArrayList<>();
-				while(rsArr.next()) {
-					stringList.add(rsArr.getString(2));
-				}			
-				return stringList;
-			}			
+			return getValueArray(property.getType(), property.getFormat(), column, rsArr);
 		}
 		return null;
+	}
+	
+	private Object getValue(ResourcePropertyType type, String format, String column, ResultSet rs) throws SQLException {
+		switch(type) {
+		case BOOLEAN:
+			return rs.getBoolean(column);
+		case INTEGER:
+			return rs.getInt(column);
+		case LONG:
+			return rs.getLong(column);
+		case DECIMAL:
+			return rs.getBigDecimal(column);					
+		case DATE:
+			return timestampToDateString(rs.getTimestamp(column), format);
+		default:
+			return rs.getString(column);
+		}		
+	}
+	
+	private Object getValueArray(ResourcePropertyType type, String format, String column, ResultSet rsArr) throws SQLException {
+		switch(type) {
+		case BOOLEAN:
+			List<Boolean> booleanList = new ArrayList<>();
+			while(rsArr.next()) {
+				booleanList.add(rsArr.getBoolean(2));
+			}			
+			return booleanList;
+		case INTEGER:
+			List<Integer> integerList = new ArrayList<>();
+			while(rsArr.next()) {
+				integerList.add(rsArr.getInt(2));
+			}			
+			return integerList; 
+		case LONG:
+			List<Long> longList = new ArrayList<>();
+			while(rsArr.next()) {
+				longList.add(rsArr.getLong(2));
+			}			
+			return longList; 
+		case DECIMAL:
+			List<BigDecimal> decimalList = new ArrayList<>();
+			while(rsArr.next()) {
+				decimalList.add(rsArr.getBigDecimal(2));
+			}			
+			return decimalList; 				
+		case DATE:
+			List<String> dateList = new ArrayList<>();
+			while(rsArr.next()) {
+				dateList.add(timestampToDateString( rsArr.getTimestamp(2), format));
+			}			
+			return dateList;
+		default:
+			List<String> stringList = new ArrayList<>();
+			while(rsArr.next()) {
+				stringList.add(rsArr.getString(2));
+			}			
+			return stringList;
+		}			
 	}
 	
 	private String timestampToDateString(Timestamp timestamp, String format) {

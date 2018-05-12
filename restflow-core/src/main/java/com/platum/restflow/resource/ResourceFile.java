@@ -1,15 +1,21 @@
 package com.platum.restflow.resource;
 
-import org.apache.commons.lang3.Validate;
+import java.io.Serializable;
 
+import org.apache.commons.lang3.Validate;
+import org.junit.Ignore;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.platum.restflow.utils.promise.PromiseHandler;
 import com.platum.restflow.utils.promise.PromiseResult;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 
-public class ResourceFile {
+public class ResourceFile implements Serializable {
 	
+	private static final long serialVersionUID = 4275505225311314919L;
+
 	private Object id;
 	
 	private String fileName;
@@ -18,10 +24,13 @@ public class ResourceFile {
 	
 	private boolean isNew = true;
 	
+	@JsonIgnore
 	private ReadStream<Buffer> stream;
 	
+	@JsonIgnore
 	private String path;
 	
+	@JsonIgnore
 	private boolean uploaded;
 	
 	public Object id() {
@@ -98,4 +107,11 @@ public class ResourceFile {
 		this.uploaded = uploaded;
 		return this;
 	}
+
+	@Override
+	public String toString() {
+		return "ResourceFile [id=" + id + ", fileName=" + fileName + ", resourceName=" + resourceName + ", isNew="
+				+ isNew + ", stream=" + stream + ", path=" + path + ", uploaded=" + uploaded + "]";
+	}
+
 }

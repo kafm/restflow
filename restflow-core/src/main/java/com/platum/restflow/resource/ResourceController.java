@@ -1,12 +1,14 @@
 package com.platum.restflow.resource;
 
 import java.io.File;
+import java.net.URLConnection;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.net.HttpHeaders;
 import com.platum.restflow.RestflowDefaultConfig;
 import com.platum.restflow.RestflowEnvironment;
 import com.platum.restflow.RestflowHttpMethod;
@@ -16,11 +18,8 @@ import com.platum.restflow.resource.impl.AbstractResourceComponent;
 import com.platum.restflow.utils.promise.Promise;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.streams.Pump;
-import io.vertx.core.streams.ReadStream;
 
 /**
  * TODO refactor to use RestflowController
@@ -314,16 +313,42 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 			} else {
 				fileSystem.get(id)
 				.success(file -> {
-					ReadStream<Buffer> readStream = file.stream();
+					String fileName = req.getParam("filename"); 
+					String contentType = "application/octet-stream"; 
+					if(StringUtils.isEmpty(fileName)) {
+						fileName = StringUtils.isEmpty(file.fileName()) 
+									? "download" : file.fileName();;
+					}
+					try {
+					    String proposedContentType = URLConnection.guessContentTypeFromName(file.fileName());
+					    if(StringUtils.isNotEmpty(proposedContentType)) {
+					    	contentType = proposedContentType;
+					    }
+					} catch(Throwable e) {}
+					try {
+						fileName = new String(fileName.getBytes("UTF-8"), "ISO-8859-1");
+					} catch(Throwable e) {}
+					res.putHeader(HttpHeaders.CONTENT_TYPE, contentType)
+							.putHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName +"\";")
+					        .putHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")
+					        .sendFile(file.path());
+					/*ReadStream<Buffer> readStream = file.stream();
 					readStream.endHandler(s -> {
-						res.putHeader("Content-Type", "application/octet-stream")
-						.putHeader("content-disposition", "attachment; filename=\"" + file.fileName() +"\"")
+						String contentType = "application/octet-stream"; 
+						try {
+						    String proposedContentType = URLConnection.guessContentTypeFromName(file.fileName());
+						    if(StringUtils.isNotEmpty(proposedContentType)) {
+						    	contentType = proposedContentType;
+						    }
+						} catch(Throwable e) {}
+						res.putHeader("Content-Type", contentType)
+						.putHeader("Content-Disposition", "attachment; filename=\"" + file.fileName() +"\";")
    						.setStatusCode(HttpResponseStatus.OK.code())
    						.end();
 					}).exceptionHandler(routingContext::fail);
 					res.setChunked(true);
 					Pump p = Pump.pump(file.stream(), res);
-					p.start();					
+					p.start();	*/				
 				})
 				.error(routingContext::fail);		
 			}

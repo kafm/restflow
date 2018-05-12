@@ -101,10 +101,6 @@ public class RestflowVerticle extends MicroserviceVerticle {
 	
 	protected Router resolveRouter() {
 		router = Router.router(vertx);
-		router.route()
-				.pathRegex(".*(?<!(upload))$")
-				.handler(BodyHandler.create());
-		router.route().failureHandler(ResourceFactory.getResourceFailureHandler(restflow.getContext()));
 		router.route().handler(CorsHandler.create("*")
 			      .allowedMethod(HttpMethod.GET)
 			      .allowedMethod(HttpMethod.POST)
@@ -121,6 +117,10 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			      .allowedHeader("Accept")
 			      .allowedHeader("enctype")
 			      .allowedHeader("Authorization"));
+		router.route()
+				.pathRegex(".*(?<!(upload))$")
+				.handler(BodyHandler.create());
+		router.route().failureHandler(ResourceFactory.getResourceFailureHandler(restflow.getContext()));
 		Table<String, String, Resource> resources = restflow.getAllResources();
 		if(!resources.isEmpty()) {
 			Set<String> resourceRowNames = resources.rowKeySet();

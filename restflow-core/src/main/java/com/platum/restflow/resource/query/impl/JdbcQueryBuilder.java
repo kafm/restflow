@@ -495,6 +495,9 @@ public class JdbcQueryBuilder implements QueryBuilder {
 						newParams.add(inPropertyName);
 					}
 					builder.append(")");
+				} else if(rightToken != null && rightToken.toString().equals("$null")) {
+					builder.append(columnName)
+							.append(" is null");
 				} else {
 					propertyName = propertyName+"_"+curIndex;
 					builder.append(columnName)
