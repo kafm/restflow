@@ -1,5 +1,6 @@
 package com.platum.restflow.resource.impl.jdbc;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -13,12 +14,8 @@ import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.platum.restflow.utils.ResourceUtils;
-
 public class JdbcExceptionMapping {
 	
-	private static final String EXCEPTIONS_FILE = "META-INF/sql-exception-mapping.xml";
-
 	private static final Logger logger = LoggerFactory.getLogger(JdbcExceptionMapping.class);
 
 	private static List<DatabaseSqlErrors> errors;	
@@ -38,27 +35,35 @@ public class JdbcExceptionMapping {
 	
 	public static JdbcExceptionMapping newInstance(boolean force) {
 		if(errors == null || force) {
-			List<URL> urls = ResourceUtils.getUrlsFromClassPath(EXCEPTIONS_FILE);
-			if(urls != null && !urls.isEmpty()) {
-				URL url = urls.get(0);
-				return load(url);
-			}
+			return load((URL) null);
 		}
 		return new JdbcExceptionMapping(null);
 	}
 	
 	public static JdbcExceptionMapping load(URL url) {
 		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(ErrorMapping.class);
-			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			ErrorMapping mapping = (ErrorMapping) jaxbUnmarshaller.unmarshal(url.openStream());			
-			if(logger.isInfoEnabled()) {
-				logger.info("Sql exception mapping loaded from xml file ["+url.getFile()+"].");
+			if(url == null) {
+				URL classPath = JdbcExceptionMapping.class.getProtectionDomain().getCodeSource().getLocation();
+				url = new URL (classPath + "/sql-exception-mapping.xml");				
 			}
-			return new JdbcExceptionMapping(mapping);
+			return load(url.openStream());
 		} catch (Throwable e) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Ignoring xml ["+url.getFile()+"].", e);
+			}
+		}
+		return null;
+	}
+	
+	public static JdbcExceptionMapping load(InputStream in) {
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(ErrorMapping.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+			ErrorMapping mapping = (ErrorMapping) jaxbUnmarshaller.unmarshal(in);			
+			return new JdbcExceptionMapping(mapping);
+		} catch (Throwable e) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring sql mapping xml.", e);
 			}
 		}
 		return null;
@@ -99,12 +104,14 @@ public class JdbcExceptionMapping {
 	}
 	
 	public static void main(String[] args) {
+		/*System.out.println(ClassUtils.getClassLocation(JdbcExceptionMapping.class));
 		String packagePath = JdbcExceptionMapping.class.getPackage().getName().replaceAll("\\.", "/");
 		String urlName = "classpath:"+packagePath+"/sql-exception-mapping.xml";
 		System.out.println(urlName);
 		URL url = ResourceUtils.getURL(urlName);
 		System.out.println(url);
 		List<URL> urls = ResourceUtils.getUrlsFromClassPath("META-INF/sql-exception-mapping.xml");
-		System.out.println(urls);
+		System.out.println(urls);*/
+		JdbcExceptionMapping.newInstance();
 	}
 }

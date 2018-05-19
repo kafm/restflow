@@ -22,7 +22,7 @@ public class DatabaseSqlErrors {
 
 	public String[] getNamesAsArray() {
 		if(names == null) return new String[0];
-		return names.split(",");
+		return names.split(" ");
 	}
 
 	public DatabaseSqlErrors setName(String name) {

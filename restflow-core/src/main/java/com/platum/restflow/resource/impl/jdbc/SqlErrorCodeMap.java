@@ -14,17 +14,17 @@ public class SqlErrorCodeMap {
 	
 	@XmlElement
     @XmlList
-	private List<Integer> codes;
+	private List<String> codes;
 	
 	private Class<? extends RestflowException> exception;
 	
 	private String message;
 
-	public List<Integer> getCode() {
+	public List<String> getCode() {
 		return codes;
 	}
 
-	public void setCodes(List<Integer> codes) {
+	public void setCodes(List<String> codes) {
 		this.codes = codes;
 	}
 

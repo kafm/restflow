@@ -22,7 +22,7 @@ public class JdbcClient {
 
 	private static final Map<String, DatasourceConf> datasourceMap = new HashMap<>();
 	
-	private static final JdbcExceptionMapping errorMapping = JdbcExceptionMapping.newInstance();
+	private static JdbcExceptionMapping errorMapping = JdbcExceptionMapping.newInstance();
 	
 	private final  Logger logger = LoggerFactory.getLogger(getClass());
 	
@@ -64,7 +64,7 @@ public class JdbcClient {
 			if(dbErrorMap != null && originalException != null) {
 				List<SqlErrorCodeMap> errorCodes = dbErrorMap.getErrorCodeMap();
 				if(errorCodes != null && !errorCodes.isEmpty()) {
-					int code = originalException.getErrorCode();
+					String code = originalException.getSQLState();
 					SqlErrorCodeMap errorMap = errorCodes.stream()
 					.filter(error -> error.getCode().contains(code))
 					.findAny()

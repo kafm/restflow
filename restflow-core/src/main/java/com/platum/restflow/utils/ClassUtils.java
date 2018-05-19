@@ -1,9 +1,11 @@
 package com.platum.restflow.utils;
 
 import java.lang.reflect.Constructor;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 public class ClassUtils {
@@ -65,5 +67,32 @@ public class ClassUtils {
 		}
 
 	}
-	
+
+	public static URL getClassLocation(Class<?> c) {
+		URL url = c.getResource(org.apache.commons.lang3.ClassUtils.getShortClassName(c) + ".class");
+		if(url == null) return null;
+		String s = url.toExternalForm();
+		String end = "/" + c.getName().replaceAll("\\.", "/") + ".class";
+		if(s.endsWith(end)) {
+			s = s.substring(0, s.length() - end.length());
+		}
+		else
+		{
+			end = end.replaceAll("/", "\\");
+			if(s.endsWith(end)){
+				s = s.substring(0, s.length() - end.length());
+			} else {
+            return null;
+			}
+		}
+		if(StringUtils.startsWith(s, "jar:") && s.endsWith("!")) {
+			s = s.substring(4, s.length() - 1);
+		}
+	    try {
+	        return new URL(s);
+	    }
+	    catch (MalformedURLException e) {
+	        return null;
+	    }
+	}
 }
