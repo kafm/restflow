@@ -43,8 +43,10 @@ public class JdbcExceptionMapping {
 	public static JdbcExceptionMapping load(URL url) {
 		try {
 			if(url == null) {
-				URL classPath = JdbcExceptionMapping.class.getProtectionDomain().getCodeSource().getLocation();
-				url = new URL (classPath + "/sql-exception-mapping.xml");				
+				//URL classPath = JdbcExceptionMapping.class.getProtectionDomain().getCodeSource().getLocation();
+				//url = new URL (classPath + "/sql-exception-mapping.xml");		
+				InputStream in = JdbcExceptionMapping.class.getResourceAsStream("/sql-exception-mapping.xml");
+				return load(in);
 			}
 			return load(url.openStream());
 		} catch (Throwable e) {

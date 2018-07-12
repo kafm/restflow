@@ -6,6 +6,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -69,6 +71,7 @@ public class ResourcePropertyValidator {
 		validate(properties, object, clazz, false);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void validate(List<ResourceProperty> properties, Object object, Class<?> clazz,
 			boolean nonNullOnly) {
 		Validate.notNull(properties);
@@ -82,7 +85,28 @@ public class ResourcePropertyValidator {
 								((ResourceObject) object).getProperty(property.getName())
 								: FieldUtils.readField(object, property.getName(), true);
 				if(value != null || !nonNullOnly) {
-					value = validate(property, value);	
+					if(property.isRepeating()) {
+						Collection<Object> valueList = new ArrayList<Object>();
+						if(value != null) {
+							if(value.getClass().isArray()) {
+								valueList = Arrays.asList(value);
+							} else if(Collection.class.isAssignableFrom(value.getClass())) {
+								valueList = (Collection<Object>) value;
+							} else {
+								valueList.add(value);
+							}							
+						} 
+						if(valueList.isEmpty() && property.isRequired()) {
+							RequiredValidationException ex =  new RequiredValidationException("Property "+ property.getLabel()+" is mandatory.")
+									.setContextProperty(property);
+							ex.params(property.getLabel());
+							throw ex;
+						} else {
+							valueList.stream().forEach(val -> validate(property, val));
+						}						
+					} else {
+						value = validate(property, value);	
+					}	
 				}
 			} catch(RestflowValidationException e) {
 				exceptions.add(e);
