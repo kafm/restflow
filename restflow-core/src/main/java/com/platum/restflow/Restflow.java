@@ -410,23 +410,29 @@ public class Restflow extends RestflowDefaultConfig {
 	}
 	
 	private void configLog() {
-		String location = environment.getProperty("LOG_CONFIG_PROPERTY");
+		String location = environment.getProperty(RestflowEnvironment.LOG_CONFIG_PATH_PROPERTY);
 		InputStream in = null;
 		try {
 			if(location == null) {
 				location = System.getProperty(logPathSystemProperty);
 				in = ResourceUtils.getInputStream(location);
+			} else {
+				in = ResourceUtils.getInputStream(location);
 			}
 			if(location == null || in == null) {	
 				for(String l : ALTERNATIVE_LOG_LOCATIONS) {
 					for(String ext : LOG_EXT) {
-						in = ResourceUtils.getInputStream(l+ext);
+						logger.info("Trying log location: "+l+ext);
+						in = getClass().getClassLoader().getResourceAsStream(l+ext);
+						if(in == null)
+							in = ResourceUtils.getInputStream(l+ext);
 					}
 					if(in != null) {
 						break;
 					}
 				}
 			}
+			logger.info("Log location: "+location);
 			if(in != null) {
 				LogManager.getLogManager().readConfiguration(in);
 				if(logger.isInfoEnabled()) {

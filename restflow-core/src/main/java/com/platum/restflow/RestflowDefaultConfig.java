@@ -18,7 +18,9 @@ public abstract class RestflowDefaultConfig {
 			"file:config/logback.",
 			"file:${RESTFLOW}/logback.",
 			"file:${RESTFLOW}/config/logback.",		
-			"file:${RESTFLOW}/config/logback."
+			"file:${RESTFLOW}/config/logback.",
+			"classpath:logback.",
+			"classpath:config/logback."
 	);
 	
 	protected static final List<String> DEFAULT_CONFIG_PATHS = Arrays.asList(

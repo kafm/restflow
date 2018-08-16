@@ -210,26 +210,17 @@ public class ResourceController<T> extends AbstractResourceComponent<T>{
 														.withLang(metadata.restflow()
 																  .getContext()
 																  .getLangRequestFromRequest(routingContext.request()));
-				service.delete(helper.getRequestIdParam())
+				Object id = helper.getRequestIdParam();
+				service.delete(id)
 				.success(v -> {
-					helper.end(HttpResponseStatus.OK);
+					if(fileSystem != null) {
+						fileSystem.destroy(id)
+									.allways(req -> helper.end(HttpResponseStatus.OK));
+					} else {
+						helper.end(HttpResponseStatus.OK);	
+					}					
 				})
-				.error(error -> {
-					helper.fail(error);
-				});
-				/*service.get(helper.getRequestIdParam())
-				.success(object -> {
-					service.delete(helper.getRequestIdParam())
-					.success(v -> {
-						helper.end(HttpResponseStatus.OK);
-					})
-					.error(error -> {
-						helper.fail(error);
-					});
-				})
-				.error(error -> {
-					helper.fail(error);
-				});*/
+				.error(helper::fail);
 			});			
 		} else {
 			route.httpMethod(RestflowHttpMethod.DELETE, routingContext -> {

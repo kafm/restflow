@@ -12,6 +12,8 @@ public interface RestflowEnvironment {
 	
 	static final String LOG_PATH_PROPERTY = "restflow.log.path";
 	
+	static final String LOG_CONFIG_PATH_PROPERTY = "restflow.log.config.path";
+	
 	static final String MODELS_PATH_PROPERTY = "restflow.models.path";
 	
 	static final String MESSAGES_PATH_PROPERTY = "restflow.messages.path";
