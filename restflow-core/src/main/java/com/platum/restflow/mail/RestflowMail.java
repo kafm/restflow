@@ -12,6 +12,8 @@ public interface RestflowMail {
 	
 	public static final String MAIL_USERNAME_PROPERTY= "restflow.smtp.username";
 	
+	public static final String MAIL_FROM_PROPERTY= "restflow.smtp.from";
+	
 	public static final String MAIL_PASSWORD_PROPERTY= "restflow.smtp.password";
 
 	public RestflowMail config();

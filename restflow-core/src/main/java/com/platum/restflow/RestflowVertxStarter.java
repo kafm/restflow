@@ -127,14 +127,26 @@ public class RestflowVertxStarter {
 			}
 		}
 		if(clusterEnabled) {
-			options.setClustered(clusterEnabled)
-			.setClusterHost(environment.getProperty(RestflowEnvironment.CLUSTER_HOST_PROPERTY))
-			.setClusterPublicHost(environment.getProperty(RestflowEnvironment.CLUSTER_PUBLIC_HOST_PROPERTY))
-			.setClusterPort(environment.getProperty(RestflowEnvironment.CLUSTER_PORT_PROPERTY, Integer.class))
-			.setClusterPublicPort(environment.getProperty(RestflowEnvironment.CLUSTER_PUBLIC_PORT_PROPERTY, Integer.class))
-			.setClusterPingInterval(environment.getProperty(RestflowEnvironment.CLUSTER_PING_INTERVAL_PROPERTY, Long.class))
-			.setClusterPingReplyInterval(environment.getProperty(RestflowEnvironment.CLUSTER_PING_REPLY_INTERVAL_PROPERTY, Long.class));
+			options.setClustered(clusterEnabled);
+			String clusterHost = environment.getProperty(RestflowEnvironment.CLUSTER_HOST_PROPERTY);
+			String clusterPublicHost = environment.getProperty(RestflowEnvironment.CLUSTER_PUBLIC_HOST_PROPERTY);
+			Integer clusterPort = environment.getProperty(RestflowEnvironment.CLUSTER_PORT_PROPERTY, Integer.class);
+			Integer publicPort = environment.getProperty(RestflowEnvironment.CLUSTER_PUBLIC_PORT_PROPERTY, Integer.class);
+			Long pingInterval = environment.getProperty(RestflowEnvironment.CLUSTER_PING_INTERVAL_PROPERTY, Long.class);
+			Long pingReplayInterval = environment.getProperty(RestflowEnvironment.CLUSTER_PING_REPLY_INTERVAL_PROPERTY, Long.class);
 			String addrsPath = environment.getProperty(RestflowEnvironment.CUSTER_ADDRESSES_PATH_PROPERTY);
+			if(StringUtils.isNotEmpty(clusterHost))
+				options.setClusterHost(clusterHost);
+			if(StringUtils.isNotEmpty(clusterPublicHost))
+				options.setClusterPublicHost(clusterPublicHost);
+			if(clusterPort != null)
+				options.setClusterPort(clusterPort);
+			if(publicPort != null)
+				options.setClusterPublicPort(publicPort);
+			if(pingInterval != null)
+				options.setClusterPingInterval(pingInterval);
+			if(pingReplayInterval != null)
+				options.setClusterPingReplyInterval(pingReplayInterval);
 			if(StringUtils.isNotEmpty(addrsPath)) {
 				options.setAddressResolverOptions(
 						new AddressResolverOptions().setHostsPath(addrsPath));

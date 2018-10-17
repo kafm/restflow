@@ -42,8 +42,10 @@ public class RestflowMailImpl implements RestflowMail {
 			String host = env.getProperty(MAIL_HOST_PROPERTY);
 			String port = env.getProperty(MAIL_PORT_PROPERTY);
 			Boolean tls = BooleanUtils.toBooleanObject(env.getProperty(MAIL_TLS_PROPERTY));
-			from = env.getProperty(MAIL_USERNAME_PROPERTY);
+			String userName = env.getProperty(MAIL_USERNAME_PROPERTY);
 			String password = env.getProperty(MAIL_PASSWORD_PROPERTY);
+			from = env.getProperty(MAIL_FROM_PROPERTY);
+			if(StringUtils.isEmpty(from)) from = userName;
 			if(StringUtils.isNotEmpty(host)) {
 				try {
 					Properties props = new Properties();
@@ -59,7 +61,7 @@ public class RestflowMailImpl implements RestflowMail {
 								  {
 									protected PasswordAuthentication getPasswordAuthentication() 
 									{
-										return new PasswordAuthentication(from, password);
+										return new PasswordAuthentication(userName, password);
 									}
 								 });
 					} else {

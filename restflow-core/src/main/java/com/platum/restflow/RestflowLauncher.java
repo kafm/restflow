@@ -9,6 +9,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
+import com.platum.restflow.utils.promise.Promise;
+import com.platum.restflow.utils.promise.PromiseFactory;
+
 public class RestflowLauncher {
 	
 	/**
@@ -55,7 +58,8 @@ public class RestflowLauncher {
 		return restflowInstance;
 	}
 	
-	public boolean launch(String[] args) {
+	public Promise<Void> launch(String[] args) {
+		Promise<Void> promise = PromiseFactory.getPromiseInstance();
 		String configPath = null;
 	    CommandLineParser parser = new DefaultParser();
 	    Options options = getOptions();
@@ -74,15 +78,21 @@ public class RestflowLauncher {
 		    		}
 		    	} 
 		    	restflowInstance = new Restflow()
-		    							.config(configPath)
-		    							.run();
+		    							.config(configPath);
+		    	restflowInstance.run()
+		    	.success(v -> promise.resolve())
+		    	.error(err -> {
+		    		err.printStackTrace();
+			        System.out.println("Try \"-help\" option for details.");
+			        promise.reject(err);
+		    	});
 		    } 
-		    return true;
 	    } catch (ParseException e) {
 	        System.out.println(e.getMessage());
 	        System.out.println("Try \"-help\" option for details.");
+	        promise.reject(e);
 	    }
-	    return false;
+	    return promise;
 	}
 	
 	private Options getOptions() {

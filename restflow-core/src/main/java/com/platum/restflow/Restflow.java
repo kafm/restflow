@@ -41,6 +41,8 @@ import com.platum.restflow.resource.ResourceMethod;
 import com.platum.restflow.resource.annotation.HookManager;
 import com.platum.restflow.utils.ClassUtils;
 import com.platum.restflow.utils.ResourceUtils;
+import com.platum.restflow.utils.promise.Promise;
+import com.platum.restflow.utils.promise.PromiseFactory;
 
 import io.vertx.core.Vertx;
 
@@ -99,11 +101,12 @@ public class Restflow extends RestflowDefaultConfig {
 		return this;
 	}
 			
-	public Restflow run(){
+	public Promise<Void> run(){
 		return run(false);
 	}
 	
-	public Restflow run(boolean staticResources) {
+	public Promise<Void> run(boolean staticResources) {
+		Promise<Void> promise = PromiseFactory.getPromiseInstance();
 		if(staticResources) {
 			if(!datasources.isEmpty()) {
 				datasources = new ImmutableMap.Builder<String, DatasourceDetails>()
@@ -131,11 +134,13 @@ public class Restflow extends RestflowDefaultConfig {
 												environment.getProperty(RestflowEnvironment.ASSETS_PATH_PROPERTY)));
 				mailService = new RestflowMailImpl(this)
 						.config();
+				promise.resolve();
 			} else {
-				throw new RestflowException("Unable to start vertx core.", res.cause());
+				logger.error("Unable to start vertx core.", res.cause());
+				promise.reject(res.cause());
 			}
 		});
-		return this;
+		return promise;
 	}
 	
 	public DatasourceDetails getDatasource(String name) {
