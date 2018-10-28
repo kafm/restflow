@@ -30,7 +30,7 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	
 	private String idProperty;
 	
-	private Class<?> idClass;
+	private Class<?> idClass; 
 	
 	public ResourceObject() {
 		uid = UUID.randomUUID().toString();
@@ -57,6 +57,8 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	
 	@SuppressWarnings("unchecked")
 	public <I> I getId() {
+		if(StringUtils.isEmpty(idProperty)) 
+			return (I) getProperty("id");
 		return (I) getProperty(idProperty, idClass);
 	}
 	
@@ -76,6 +78,7 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	public <T> T getProperty(String name, Class<T> clazz) {
 		Object value = getProperty(name);
 		if(value != null) {
+			if(clazz == null) clazz = (Class<T>) String.class;
 			return (T) ConvertUtils.convert(value, clazz);
 		}
 		return null;

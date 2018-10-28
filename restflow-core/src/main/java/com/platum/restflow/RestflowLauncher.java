@@ -80,8 +80,10 @@ public class RestflowLauncher {
 		    	restflowInstance = new Restflow()
 		    							.config(configPath);
 		    	restflowInstance.run()
-		    	.success(v -> promise.resolve())
-		    	.error(err -> {
+		    	.success(v -> {
+		    		System.out.println("Server Started.");
+		    		promise.resolve();
+		    	}).error(err -> {
 		    		err.printStackTrace();
 			        System.out.println("Try \"-help\" option for details.");
 			        promise.reject(err);
