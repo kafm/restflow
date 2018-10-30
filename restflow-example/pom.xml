@@ -70,7 +70,7 @@
 			  <archive>
 			    <manifest>
 				<addClasspath>true</addClasspath>
-				<mainClass>com.platum.restflow.App</mainClass>
+				<mainClass>com.platum.restflow.example.App</mainClass>
 				<classpathPrefix>lib/</classpathPrefix>
 			    </manifest>
 			  </archive>
