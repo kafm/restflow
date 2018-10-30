@@ -9,4 +9,5 @@ tmp
 target
 restflow-auth/restflow-auth/target
 restflow-core/target
+restflow-example/target
 .DS_Store

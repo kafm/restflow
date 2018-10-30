@@ -35,3 +35,16 @@ including clients, projects, and operations.
  -->
 
 ## Getting started
+You can start forking the [restflow-example](./restflow-example) project.
+Restflow is not yet hosted on maven, so you have to compile and install it yourself for now.
+Here are the steps
+    
+    git clone https://github.com/kafm/restflow/
+
+    cd restflow/restflow-core && mvn clean compile assembly:single && mvn install:install-file -Dfile=target/restflow.jar  -DpomFile=pom.xml 
+
+
+## Wiki & API Docs
+Soon, also see [restflow-example](./restflow-example)
+
+Copyright [Platum Inc](https://platum.io/) 2016-2018
