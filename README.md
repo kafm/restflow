@@ -11,7 +11,6 @@ and easily deployable rest apis and microservices.
 
 
 ## Architecture
-
     Restflow was built using [vertx](https://vertx.io/), [hazelcast](https://hazelcast.com/) and very easy to understand nonblocking architecture.
     The architecture adopted allows restflow to easily scale from a single to a multitude of commodity commodities.
     Fork the code make changes
@@ -22,7 +21,6 @@ and easily deployable rest apis and microservices.
 
 
 ## Apps built using restflow
-
     ### [flexbundle](https://flexbundle.com/)
     Flexbundle (also known as flex) allows you to build custom collaborative databases to manage your work your way. Easily collect, track and analyze everything including clients, projects, and operations.
 
