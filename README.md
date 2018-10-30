@@ -38,13 +38,13 @@ including clients, projects, and operations.
 Restflow is not yet hosted on maven, so you have to compile and install it yourself for now.
 Here are the steps:
 
-Clone the repo:    
+    Clone the repo:    
         git clone https://github.com/kafm/restflow/
 
-Compile:
+    Compile:
         cd restflow/restflow-core && mvn clean compile assembly:single 
 
-Install:
+    Install:
         mvn install:install-file -Dfile=target/restflow.jar  -DpomFile=pom.xml 
 
 
