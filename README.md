@@ -16,11 +16,17 @@ Restflow was built using [vertx](https://vertx.io/), [hazelcast](https://hazelca
 
 The architecture adopted allows restflow to easily scale from a single to a multitude of commodity hardware.
 
-Fork the code make changes.
+Fork the code, make changes, contributions are welcome.
 
 
 ## Tests
     TODO
+
+## Tasks
+[ ] Customize logs
+[ ] Write api docs
+[ ] Write wiki
+[ ] Write [example](restflow-example/) README
 
 
 ## Getting started

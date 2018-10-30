@@ -1,14 +1,9 @@
 package com.platum.restflow.example;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import com.platum.restflow.RestflowLauncher;
-import org.h2.Driver;
+
 /**
- * Hello world!
+ * Restflow App
  */
 public class App  {
 	public final static String PRODUCT_TABLE = "CREATE TABLE product ("+ 
@@ -21,6 +16,5 @@ public class App  {
     	app.launch(args)
     	.success(v -> {
     	});
-
     }
 }
