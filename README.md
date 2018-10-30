@@ -95,5 +95,3 @@ Flexbundle (also known as flex) allows you to build custom collaborative databas
 You can easily collect, track and analyze everything 
 including clients, projects, and operations.
 
-
-Copyright [Platum Inc](https://platum.io/) 2016-2018
