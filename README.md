@@ -12,8 +12,8 @@ and easily deployable rest apis and microservices.
 
 ## Architecture
 
-Restflow was built using [vertx](https://vertx.io/), [hazelcast](https://hazelcast.com/) and very easy to understand nonblocking architecture.
-    The architecture adopted allows restflow to easily scale from a single to a multitude of commodity commodities.
+Restflow was built using [vertx](https://vertx.io/), [hazelcast](https://hazelcast.com/) and a very easy to understand nonblocking architecture.
+    The architecture adopted allows restflow to easily scale from a single to a multitude of commodity hardware.
     Fork the code make changes
 
 
