@@ -16,7 +16,7 @@ Restflow was built using [vertx](https://vertx.io/), [hazelcast](https://hazelca
 
 The architecture adopted allows restflow to easily scale from a single to a multitude of commodity hardware.
 
-Fork the code make changes
+Fork the code make changes.
 
 
 ## Tests
