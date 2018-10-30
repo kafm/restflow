@@ -1,7 +1,8 @@
-# Restflow - powerful rest apps with your flow
+# Restflow - A BaaS framework to expose datasources as Rest Api
 
 Restflow is a JVM targeted framework used to build high performance, 
-and easily deployable rest apis and microservices.
+and easily deployable rest apis and microservices and to help
+organizations expose their existing datasources as Rest Api.
 
 
 ## Main objectives
