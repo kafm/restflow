@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model>
+    <version>v1</version>
+    <datasources>
+        <datasource name="postgres" class="com.platum.restflow.resource.impl.jdbc.JdbcRepository">
+            <properties>
+                <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/agate"/>
+                <property name="driverClassName" value="org.postgresql.Driver" />
+                <property name="username" value="agate"/>
+                <property name="password" value=""/>         
+            </properties>
+        </datasource>
+    </datasources>
+    <filesystems>
+        <filesytem name="localFs">
+            <properties>
+                <property name="path" value="./_files"/>
+            </properties>
+        </filesytem>
+    </filesystems>        
+</model>
