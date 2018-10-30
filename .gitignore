@@ -1,0 +1,12 @@
+node_modules
+build
+_files
+.settings
+.vertx
+.classpath
+.project
+tmp
+target
+restflow-auth/restflow-auth/target
+restflow-core/target
+.DS_Store
