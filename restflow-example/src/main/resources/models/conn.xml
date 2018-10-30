@@ -4,7 +4,7 @@
     <datasources>
         <datasource name="h2" class="com.platum.restflow.resource.impl.jdbc.JdbcRepository">
             <properties>
-                <property name="jdbcUrl" value="jdbc:h2:mem:test;INIT=create table product(id integer, name varchar(50));"/>
+                <property name="jdbcUrl" value="jdbc:h2:mem:;INIT=create table product(id bigint auto_increment, name varchar(50));"/>
                 <property name="driverClassName" value="org.h2.Driver" />
                 <property name="username" value="sa"/>
                 <property name="password" value=""/>         
