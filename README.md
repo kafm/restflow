@@ -35,7 +35,6 @@ including clients, projects, and operations.
  -->
 
 ## Getting started
-You can start forking the [restflow-example](./restflow-example) project.
 Restflow is not yet hosted on maven, so you have to compile and install it yourself for now.
 Here are the steps
     
