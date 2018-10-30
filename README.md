@@ -25,8 +25,11 @@ Fork the code, make changes, contributions are welcome.
 
 ## Tasks
 [ ] Customize logs
+
 [ ] Write api docs
+
 [ ] Write wiki
+
 [ ] Write [example](restflow-example/) README
 
 
