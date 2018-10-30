@@ -50,7 +50,9 @@ Here are the steps:
 
     Import the project restflow-example into eclipse and run the class com.platum.restflow.example.App
     
-    And then test the example:
+
+
+And then test the example:
     
     # create some products
     curl --header "Content-Type: application/json" \
