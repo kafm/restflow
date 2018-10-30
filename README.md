@@ -24,13 +24,13 @@ Fork the code, make changes, contributions are welcome.
     TODO
 
 ## Tasks
-[ ] Customize logs
+- [ ] Customize logs
 
-[ ] Write api docs
+- [ ] Write api docs
 
-[ ] Write wiki
+- [ ] Write wiki
 
-[ ] Write [example](restflow-example/) README
+- [ ] Write [example](restflow-example/) README
 
 
 ## Getting started
