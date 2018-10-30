@@ -25,7 +25,9 @@ Fork the code make changes
 
 ## Apps built using restflow
 ### [flexbundle](https://flexbundle.com/)
-    Flexbundle (also known as flex) allows you to build custom collaborative databases to manage your work your way. Easily collect, track and analyze everything including clients, projects, and operations.
+Flexbundle (also known as flex) allows you to build custom collaborative databases to manage your work your way. 
+You can easily collect, track and analyze everything 
+including clients, projects, and operations.
 
 ### Flexmarket (soon)
     Flexmarket is a platform that allows people to trade stocks, bonds, currencies using a confortable mobile app (android & ios)
