@@ -8,6 +8,16 @@ _files
 tmp
 target
 restflow-auth/restflow-auth/target
+restflow-auth/target
+restflow-auth/.settings
+restflow-auth/.project
+restflow-auth/.classpath
 restflow-core/target
+restflow-core/.settings
+restflow-core/.project
+restflow-core/.classpath
 restflow-example/target
+restflow-example/.settings
+restflow-example/.project
+restflow-example/.classpath
 .DS_Store
