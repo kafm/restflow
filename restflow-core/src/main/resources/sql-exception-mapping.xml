@@ -39,7 +39,7 @@
 				<message>Bad Sql provided in query.</message>	
 			</map>
 			<map>
-				<codes>23001 23505 22001 22003 22012 22018 22025 23000 23002 23003 23502 23503 23506 23507 23513</codes>
+				<codes>23001 23505 22001 22003 22012 22018 22025 M 23002 23003 23502 23503 23506 23507 23513</codes>
 				<exception>com.platum.restflow.exceptions.RestflowDuplicatedKeyException</exception>
 				<message>Object with the same id/key already exists.</message>	
 			</map>		

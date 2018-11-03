@@ -109,6 +109,7 @@ public class ResourcePropertyValidator {
 					}	
 				}
 			} catch(RestflowValidationException e) {
+				e.printStackTrace();
 				exceptions.add(e);
 			} catch(Throwable e) {
 				RestflowFieldConversionValidationException ex = new RestflowFieldConversionValidationException("Impossible to convert field ["+property.getName()+"]", e);
@@ -157,7 +158,9 @@ public class ResourcePropertyValidator {
 		    	case DECIMAL:
 		    		return validateDecimal(property, strVal);	
 		    	case DATE:
-		    		return validateDate(property, strVal);	
+		    		return (value instanceof Date) 
+		    				? validateDate(property, (Date) value)
+		    				: validateDate(property, strVal);	
 		    	case EMAIL:
 		    		return validateEmail(property, strVal);			
 		    	case IPV4:
@@ -284,16 +287,21 @@ public class ResourcePropertyValidator {
 		String format = GenericValidator.isBlankOrNull(property.getFormat())? 
 												DEFAULT_DATE_FORMAT : property.getFormat();
 		String pattern = new SimpleDateFormat(format).toPattern();
-		String min = property.getMin();
-		String max = property.getMax();
 		Date dateValue = validator.validate(value, pattern);
 		if(dateValue == null  && StringUtils.isNotEmpty(value)) {
 			InvalidDateValidationException ex = new InvalidDateValidationException("Invalid date value for property "+property.getLabel());
 			ex.params(property.getLabel());
 			throw ex;
 		}
-		validateRange(property.getLabel(), dateValue, validator.validate(min), validator.validate(max));
-		return dateValue;		
+		return validateDate(property, dateValue);		
+	}
+	
+	public static Date validateDate(ResourceProperty property, Date value) {
+		DateValidator validator = DateValidator.getInstance();
+		String min = property.getMin();
+		String max = property.getMax();
+		validateRange(property.getLabel(), value, validator.validate(min), validator.validate(max));
+		return value;		
 	}
 
 	public static String validateCreditCard(ResourceProperty property, String value) {

@@ -64,7 +64,7 @@ public class JdbcClient {
 			if(dbErrorMap != null && originalException != null) {
 				List<SqlErrorCodeMap> errorCodes = dbErrorMap.getErrorCodeMap();
 				if(errorCodes != null && !errorCodes.isEmpty()) {
-					String code = originalException.getSQLState();
+					String code = ""+originalException.getErrorCode();
 					SqlErrorCodeMap errorMap = errorCodes.stream()
 					.filter(error -> error.getCode().contains(code))
 					.findAny()
