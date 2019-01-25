@@ -64,7 +64,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	
 	public ResourceObject setId(Object id) {
 		if(!StringUtils.isEmpty(idProperty)) {
-			put(idProperty, id);
+			if(id != null) {
+				put(idProperty, id);	
+			}
 			return this;
 		}
 		throw new RestflowException("No id property reference provided.");
@@ -85,7 +87,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	public ResourceObject setProperty(String name, Object value) {
-		put(name, value);
+		if(value != null) {
+			put(name, value);	
+		}		
 		return this;
 	}
 	
@@ -95,7 +99,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	public ResourceObject setString(String name, String value) {
-		put(name, value.toString());
+		if(value != null) {
+			put(name, value.toString());	
+		}
 		return this;
 	}
 	
@@ -114,7 +120,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	public ResourceObject setInteger(String name, Integer value) {
-		put(name, value);
+		if(value != null) {
+			put(name, value);	
+		}
 		return this;
 	}
 	
@@ -133,7 +141,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	public ResourceObject setLong(String name, Long value) {
-		put(name, value);
+		if(value != null) {
+			put(name, value);	
+		}
 		return this;
 	}
 	
@@ -142,7 +152,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	public ResourceObject setDecimal(String name, BigDecimal value) {
-		put(name, value);
+		if(value != null) {
+			put(name, value);	
+		}
 		return this;
 	}
 	
@@ -153,7 +165,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	public ResourceObject setBoolean(String name, Boolean value) {
-		put(name, value);
+		if(value != null) {
+			put(name, value);	
+		}
 		return this;
 	}
 
@@ -176,7 +190,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 	
 	public ResourceObject setDate(String name, Date value) {
-		put(name, value);
+		if(value != null) {
+			put(name, value);	
+		}
 		return this;
 	}
 	
@@ -200,7 +216,9 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	}
 		
 	public <T> ResourceObject setList(String name, List<T> value) {
-		put(name, value);
+		if(value != null) {
+			put(name, value);	
+		}
 		return this;
 	}
 		
