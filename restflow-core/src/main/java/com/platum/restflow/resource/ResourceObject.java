@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -82,6 +83,16 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 		if(value != null) {
 			if(clazz == null) clazz = (Class<T>) String.class;
 			return (T) ConvertUtils.convert(value, clazz);
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ResourceObject getResourceProperty(String name) {
+		Object value = getProperty(name);
+		if(value != null) {
+			Map<String, Object> map = (Map<String, Object>) ConvertUtils.convert(value, HashMap.class);
+			return new ResourceObject().setProperties(map);
 		}
 		return null;
 	}
