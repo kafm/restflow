@@ -9,6 +9,8 @@ public class Message {
 	
 	private String to;
 	
+	private String replyTo;
+	
 	private List<String> cc;
 	
 	private List<String> bcc;
@@ -36,6 +38,15 @@ public class Message {
 
 	public Message to(String to) {
 		this.to = to;
+		return this;
+	}
+	
+	public String replyTo() {
+		return replyTo;
+	}
+
+	public Message replyTo(String replyTo) {
+		this.replyTo = replyTo;
 		return this;
 	}
 
