@@ -10,8 +10,8 @@ import org.junit.Test;
 import org.sql2o.Connection;
 
 import com.platum.restflow.Restflow;
-import com.platum.restflow.exceptions.ResflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowDuplicatedRefException;
+import com.platum.restflow.exceptions.RestflowNotExistsException;
 import com.platum.restflow.resource.Params;
 import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceFactory;
@@ -87,7 +87,7 @@ public class JdbcRepositoryTest {
 		Assert.assertEquals("john", object.getProperty("name"));
 	}
 	
-	@Test(expected=ResflowNotExistsException.class)
+	@Test(expected=RestflowNotExistsException.class)
 	public void testGetNotFound() {
 		resolveRepository();
 		repository.get(resource.getMethod("getById"), 
@@ -181,7 +181,7 @@ public class JdbcRepositoryTest {
 										.getString("name"));
 	}
 	
-	@Test(expected=ResflowNotExistsException.class)
+	@Test(expected=RestflowNotExistsException.class)
 	public void testDelete() {
 		resolveRepository();
 		ResourceMethod method = resource.getMethod("delete");

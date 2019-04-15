@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.platum.restflow.RestflowContext;
-import com.platum.restflow.exceptions.ResflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.exceptions.RestflowForbiddenException;
 import com.platum.restflow.exceptions.RestflowListOfException;
 import com.platum.restflow.exceptions.RestflowNotAllowedException;
+import com.platum.restflow.exceptions.RestflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowObjectValidationException;
 import com.platum.restflow.exceptions.RestflowUnauthorizedException;
 import com.platum.restflow.exceptions.RestflowValidationException;
@@ -46,7 +46,7 @@ public class ResourceFailureHandlerImpl implements PromiseHandler<RoutingContext
 			code = HttpResponseStatus.FORBIDDEN.code();	
 		} else if(exception instanceof RestflowNotAllowedException) {
 			code = HttpResponseStatus.METHOD_NOT_ALLOWED.code();
-		} else if(exception instanceof ResflowNotExistsException) {
+		} else if(exception instanceof RestflowNotExistsException) {
 			code = HttpResponseStatus.BAD_REQUEST.code();
 		} else if(exception instanceof RestflowListOfException) {
 			code = HttpResponseStatus.BAD_REQUEST.code();

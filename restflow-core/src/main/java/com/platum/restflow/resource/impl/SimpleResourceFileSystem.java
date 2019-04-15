@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.platum.restflow.FileSystemDetails;
-import com.platum.restflow.exceptions.ResflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowException;
+import com.platum.restflow.exceptions.RestflowNotExistsException;
 import com.platum.restflow.resource.ResourceFile;
 import com.platum.restflow.resource.ResourceFileSystem;
 import com.platum.restflow.resource.ResourceMetadata;
@@ -139,7 +139,7 @@ public class SimpleResourceFileSystem<T> extends AbstractResourceComponent<T>  i
 				});
 				
 			} else {
-				promise.reject(new ResflowNotExistsException(
+				promise.reject(new RestflowNotExistsException(
 						"File ["+metadata.resource().getName() +
 									","+id+"] does not exists."));
 			}

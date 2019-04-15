@@ -15,9 +15,9 @@ import org.sql2o.ResultSetIterable;
 
 import com.platum.restflow.AuthMetadata;
 import com.platum.restflow.exceptions.InvalidQueryFieldException;
-import com.platum.restflow.exceptions.ResflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowDuplicatedRefException;
 import com.platum.restflow.exceptions.RestflowFieldConversionValidationException;
+import com.platum.restflow.exceptions.RestflowNotExistsException;
 import com.platum.restflow.resource.Params;
 import com.platum.restflow.resource.Resource;
 import com.platum.restflow.resource.ResourceMetadata;
@@ -76,7 +76,7 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 				}
 				return object;
 			} else {
-				throw new ResflowNotExistsException("Object not found.");
+				throw new RestflowNotExistsException("Object not found.");
 			}
 		} catch(Throwable e) {
 			throw jdbcClient.translateException(e);

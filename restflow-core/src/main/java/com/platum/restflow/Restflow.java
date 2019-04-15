@@ -30,9 +30,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
-import com.platum.restflow.exceptions.ResflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowDuplicatedRefException;
 import com.platum.restflow.exceptions.RestflowException;
+import com.platum.restflow.exceptions.RestflowNotExistsException;
 import com.platum.restflow.impl.RestflowEnvironmentImpl;
 import com.platum.restflow.mail.RestflowMail;
 import com.platum.restflow.mail.impl.RestflowMailImpl;
@@ -146,14 +146,14 @@ public class Restflow extends RestflowDefaultConfig {
 	public DatasourceDetails getDatasource(String name) {
 		DatasourceDetails datasourceProperties = datasources.get(name);
 		if(datasourceProperties == null) {
-			throw new ResflowNotExistsException("Datasource ["+name+"] does not exists.");
+			throw new RestflowNotExistsException("Datasource ["+name+"] does not exists.");
 		}
 		return datasourceProperties;
 	}
 	
 	public Restflow addDatasource(DatasourceDetails... datasource) {
 		if(datasources == null) {
-			throw new ResflowNotExistsException("Datasources cannot be null at this point.");
+			throw new RestflowNotExistsException("Datasources cannot be null at this point.");
 		}
 		loadDatasources(Arrays.asList(datasource));
 		return this;
@@ -162,7 +162,7 @@ public class Restflow extends RestflowDefaultConfig {
 	public FileSystemDetails getFileSystem(String name) {
 		FileSystemDetails fsProperties = fileSystems.get(name);
 		if(fsProperties == null) {
-			throw new ResflowNotExistsException("FileSystem ["+name+"] does not exists.");
+			throw new RestflowNotExistsException("FileSystem ["+name+"] does not exists.");
 		}
 		return fsProperties;
 	}
@@ -192,7 +192,7 @@ public class Restflow extends RestflowDefaultConfig {
 				return resource;
 			}
 		}
-		throw new ResflowNotExistsException("Resource ["+name+version+"] does not exists.");
+		throw new RestflowNotExistsException("Resource ["+name+version+"] does not exists.");
 	}
 
 	public Map<String, FileSystemDetails> getAllFileSystems() {

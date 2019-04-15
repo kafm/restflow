@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang3.Validate;
 
-import com.platum.restflow.exceptions.ResflowNotExistsException;
+import com.platum.restflow.exceptions.RestflowNotExistsException;
 import com.platum.restflow.exceptions.RestflowDuplicatedRefException;
 import com.platum.restflow.resource.Resource;
 
@@ -142,7 +142,7 @@ public class RestflowModel {
 				}
 			}
 		}
-		throw new ResflowNotExistsException("Datasource does not exists.");
+		throw new RestflowNotExistsException("Datasource does not exists.");
 	}
 	
 	/**
@@ -223,7 +223,7 @@ public class RestflowModel {
 				}
 			}
 		}
-		throw new ResflowNotExistsException("Datasource does not exists.");
+		throw new RestflowNotExistsException("Datasource does not exists.");
 	}
 	
 	/**
@@ -308,7 +308,7 @@ public class RestflowModel {
 				}
 			}
 		}
-		throw new ResflowNotExistsException("Resource does not exists.");
+		throw new RestflowNotExistsException("Resource does not exists.");
 	}
 	
 	/**
@@ -327,7 +327,7 @@ public class RestflowModel {
 				}
 			}
 		}
-		throw new ResflowNotExistsException("Resource does not exists.");
+		throw new RestflowNotExistsException("Resource does not exists.");
 	}
 	
 	/**
