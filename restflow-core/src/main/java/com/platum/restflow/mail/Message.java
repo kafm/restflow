@@ -11,6 +11,8 @@ public class Message {
 	
 	private String replyTo;
 	
+	private String replyToName;
+	
 	private List<String> cc;
 	
 	private List<String> bcc;
@@ -49,7 +51,16 @@ public class Message {
 		this.replyTo = replyTo;
 		return this;
 	}
+	
+	public String replyToName() {
+		return replyToName;
+	}
 
+	public Message replyToName(String replyToName) {
+		this.replyToName = replyToName;
+		return this;
+	}
+	
 	public List<String> cc() {
 		return cc;
 	}
