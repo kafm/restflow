@@ -422,6 +422,7 @@ public class JdbcQueryBuilder implements QueryBuilder {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked"})
 	private Pair<StringBuilder, Params> completeQueryWithFilter(QueryFilter filter, boolean appendWhere) {
 		Object leftToken = filter.leftToken();
 		Object rightToken = filter.rightToken();
@@ -472,11 +473,17 @@ public class JdbcQueryBuilder implements QueryBuilder {
 				List<String> newParams = new ArrayList<>();
 				int curIndex = paramNames == null ? 0 : paramNames.length;
 				if(operation.equals(QueryOperation.IN) || operation.equals(QueryOperation.NOT_IN)) {
-					final List<Object> vals =  new ArrayList<>();
-					try {
-						vals.addAll((Collection<?>) rightToken);
-					} catch(Throwable e) {
-						vals.addAll(Arrays.asList(rightToken));
+					List<Object> vals =  new ArrayList<>();
+					if(rightToken instanceof List) {
+						vals = (List<Object>) rightToken;
+					} else if(rightToken.getClass().isArray()) {
+						vals.addAll(Arrays.asList((Object[]) rightToken));
+					} else {
+						try {
+							vals.addAll((Collection<?>) rightToken);
+						} catch(Throwable e) {
+							vals.addAll(Arrays.asList(rightToken));
+						}	
 					}
 					builder.append(columnName)
 					.append(op)
