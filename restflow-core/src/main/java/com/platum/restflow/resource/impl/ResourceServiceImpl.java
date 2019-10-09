@@ -259,6 +259,26 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	}
 	
 	@Override
+	public Promise<Void> update(ResourceMethod method, Params params) {
+		Promise<Void> promise = PromiseFactory.getPromiseInstance();
+		assertValidMethod(method);
+		vertx.executeBlocking(future -> {
+			if(transaction != null) {
+				repository.withTransaction(transaction);
+			}
+			repository.update(method, params);
+			future.complete();
+		}, result -> {
+			if(result.succeeded()) {
+				promise.resolve();
+			} else {
+				promise.reject(result.cause());
+			}
+		});		
+		return promise;
+	}
+	
+	@Override
 	public Promise<T> partialUpdate(ResourceMethod method, T object) {
 		return partialUpdate(method, object, null);
 	}
