@@ -28,10 +28,13 @@ import com.platum.restflow.utils.promise.Promise;
 import com.platum.restflow.utils.promise.PromiseFactory;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
 
 public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> implements ResourceService<T> {
 
 	private final  Logger logger = LoggerFactory.getLogger(getClass());
+	
+	private static final String WORKER_POOL_NAME ="DB_QUERY_POOL";
 	
 	private ResourceRepository<T> repository;
 
@@ -56,7 +59,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public <I> Promise<T> get(I id) {
 		Promise<T> promise = PromiseFactory.getPromiseInstance();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			if(id == null) {
 				throw new RestflowInvalidRequestException("Get object with null id it's not allowed");
 			}
@@ -66,7 +70,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 					 .generateGetByIdIfNotFound()
 					 .method();
 			future.complete(method);
-		}, res -> {
+		}, false, res -> {
+			executor.close();
 			if(res.succeeded()) {
 				promise.wrap(get((ResourceMethod) res.result(), 
 						new Params().addParam("id", id)));				
@@ -81,7 +86,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public Promise<T> get(ResourceMethod method, Params params) {
 		Promise<T> promise = PromiseFactory.getPromiseInstance();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			assertValidMethod(method);
 			T object  = repository.get(method, params);
 			HookInterceptor hook = getHook(HookType.GET, object);
@@ -94,7 +100,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				.success(prunnedObj -> future.complete(prunnedObj))
 				.error(error -> future.fail(error));
 			}
-		}, result -> {
+		}, false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve((T) result.result());
 			} else {
@@ -133,7 +140,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public Promise<List<ResourceObject>> find(ResourceMethod method, QueryFilter filter, QueryModifier modifier, Params params) {
 		Promise<List<ResourceObject>> promise = PromiseFactory.getPromiseInstance();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			assertValidMethod(method);
 			QueryBuilder builder = metadata.getQueryBuilderInstance();
 			builder.method(method)
@@ -150,7 +158,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				res = repository.find(builder.method(), builder.params());
 			}
 			future.complete(res);
-		}, result -> {
+		}, false , result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve((List<ResourceObject>) result.result());
 			} else {
@@ -164,12 +173,14 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public Promise<List<ResourceObject>> find(ResourceMethod method, Params params) {
 		Promise<List<ResourceObject>> promise = PromiseFactory.getPromiseInstance();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			assertValidMethod(method);
 			List<ResourceObject> res = 
 					 repository.find(method, params);
 			future.complete(res);
-		}, result -> {
+		},false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve((List<ResourceObject>) result.result());
 			} else {
@@ -191,14 +202,16 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public Promise<Long> count(ResourceMethod method, QueryFilter filter) {
 		Promise<Long> promise = PromiseFactory.getPromiseInstance();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			assertValidMethod(method);
 			QueryBuilder builder = metadata.getQueryBuilderInstance();
 			builder.method(method)
 			 	   .wrapIfAllowed()
 				   .completeQueryWithFilter(filter);
 			future.complete(repository.count(builder.method(), builder.params()));
-		}, result -> {
+		}, false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve((Long) result.result());
 			} else {
@@ -261,14 +274,16 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public Promise<Void> update(ResourceMethod method, Params params) {
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
-		assertValidMethod(method);
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
+			assertValidMethod(method);
 			if(transaction != null) {
 				repository.withTransaction(transaction);
 			}
 			repository.update(method, params);
 			future.complete();
-		}, result -> {
+		}, false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
 			} else {
@@ -313,14 +328,16 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public Promise<Void> delete(ResourceMethod method, Params params) {
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
-		assertValidMethod(method);
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
+			assertValidMethod(method);
 			if(transaction != null) {
 				repository.withTransaction(transaction);
 			}
 			repository.delete(method, params);
 			future.complete();
-		}, result -> {
+		}, false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
 			} else {
@@ -341,7 +358,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	@Override
 	public Promise<Void> batchUpdate(ResourceMethod method, List<T> objects) {
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			try {
 				assertValidMethod(method);
 				if(objects != null && !objects.isEmpty()) {
@@ -352,7 +370,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				logger.error("Batch operation failed", e);
 				future.fail(e);
 			}
-		}, result -> {
+		}, false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
 			} else {
@@ -428,7 +447,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 	
 	private Promise<Void> destroy(ResourceMethod method, ObjectContext<T> objContext) {
 		Promise<Void> promise = PromiseFactory.getPromiseInstance();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			T object = objContext.object();
 			HookInterceptor hook = getHook(HookType.DESTROY, object);
 			if(hook == null) {
@@ -461,7 +481,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 					}
 				});
 			}
-		}, result -> {
+		}, false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
 			} else {
@@ -480,7 +501,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		Promise<T> promise = PromiseFactory.getPromiseInstance();
 		final boolean isNew = objContext.isNew();
 		Params extParams = objContext.params();
-		vertx.executeBlocking(future -> {
+		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
+		executor.executeBlocking(future -> {
 			final T object = objContext.object();
 			ResourcePropertyValidator.validate(metadata.resource().getProperties(), 
 					object, metadata.resourceClass(), partial);
@@ -523,7 +545,8 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 					}
 				});
 			}
-		}, result -> {
+		}, false, result -> {
+			executor.close();
 			if(result.succeeded()) {
 				promise.resolve((T) result.result());
 			} else {

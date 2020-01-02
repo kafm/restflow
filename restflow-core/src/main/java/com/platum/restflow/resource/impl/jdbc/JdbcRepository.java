@@ -91,11 +91,15 @@ public class JdbcRepository<T> extends AbstractResourceComponent<T> implements R
 		if(logger.isInfoEnabled()) {
 			logger.info("Executing query "+method.getQuery());
 		}
+		long start = System.currentTimeMillis();
 		try {
 			Query query = addQueryParams(connection.createQuery(method.getQuery()),
 					method.getParams(), params);
 			ResultSetHandler<ResourceObject> mapper = new JdbcResourceObjectMapper<ResourceObject>(metadata, fields);
-			return query.executeAndFetch(mapper);
+			List<ResourceObject> res = query.executeAndFetch(mapper);
+			long end = System.currentTimeMillis();
+			logger.info("Find request took "+(end-start)+"ms");
+			return res;
 		} catch(Throwable e) {
 			throw jdbcClient.translateException(e);
 		} finally {

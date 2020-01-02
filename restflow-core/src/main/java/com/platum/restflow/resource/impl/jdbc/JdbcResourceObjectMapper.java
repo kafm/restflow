@@ -88,9 +88,9 @@ public class JdbcResourceObjectMapper<T> implements ResultSetHandler<T> {
 		} else {
 			setValue(object, column, rs.getObject(column));
 		}
-		if(logger.isDebugEnabled()) {
+		/*if(logger.isDebugEnabled()) {
 			logger.debug("No property match found for column "+column);
-		}
+		}*/
 	}
 		
 	private void setValue(T object, ResourceProperty property, String column, ResultSet rs) throws SQLException {
