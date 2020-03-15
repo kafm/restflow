@@ -1,5 +1,6 @@
 package com.platum.restflow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
@@ -12,6 +13,9 @@ import com.platum.restflow.exceptions.RestflowException;
 import com.platum.restflow.resource.DownloadMethod;
 import com.platum.restflow.resource.ResourceMethod;
 import com.platum.restflow.resource.UploadMethod;
+import com.platum.restflow.utils.promise.Promise;
+import com.platum.restflow.utils.promise.PromiseFactory;
+import com.platum.restflow.utils.promise.PromiseResult;
 
 import io.vertx.core.Handler;
 import io.vertx.ext.web.Route;
@@ -64,19 +68,28 @@ public class RestflowRoute {
 	}
 	
 	private void handleRoute(RoutingContext context) {
-		if(filters != null && !filters.isEmpty()) {
-			try {
-				filters.stream().forEach(filter -> {
-					filter.filter(method, context);	
-				});	
-			} catch(Throwable e) {
-				context.fail(e);
-			}
-		} else if(logger.isDebugEnabled()) {
+		if(filters == null || filters.isEmpty()) {
 			logger.debug("No filter services found.");
-		}
-		if(!context.failed()) {
-			handler.handle(context);
+			handler.handle(context);	
+		} else {
+			List<Promise<Void>> promises = new ArrayList<>();
+			filters.stream().forEach(filter -> {
+				promises.add(filter.filter(method, context));	
+			});
+			PromiseFactory.whenAll(promises)
+			.allways(res -> {
+				if(res.failed()) {
+					context.fail(res.cause());	
+				} else {
+					for(PromiseResult<Void> promiseRes : res.result()) {
+						if(promiseRes.failed()) {
+							context.fail(promiseRes.cause());
+							break;
+						} 
+					}
+					handler.handle(context);
+				}
+			});
 		}
 	}
 	

@@ -1,7 +1,7 @@
 package com.platum.restflow.utils.promise;
 
 public interface Promise<T> {
-	
+	 
 	default Promise<T> then(PromiseHandler<T> successHandler) {
 		then(successHandler, null);
 		return this;

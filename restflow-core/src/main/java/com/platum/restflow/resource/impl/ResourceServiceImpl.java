@@ -282,7 +282,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 			}
 			repository.update(method, params);
 			future.complete();
-		}, false, result -> {
+		}, result -> {
 			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
@@ -336,7 +336,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 			}
 			repository.delete(method, params);
 			future.complete();
-		}, false, result -> {
+		}, result -> {
 			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
@@ -370,7 +370,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 				logger.error("Batch operation failed", e);
 				future.fail(e);
 			}
-		}, false, result -> {
+		}, result -> {
 			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
@@ -481,7 +481,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 					}
 				});
 			}
-		}, false, result -> {
+		}, result -> {
 			executor.close();
 			if(result.succeeded()) {
 				promise.resolve();
@@ -545,7 +545,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 					}
 				});
 			}
-		}, false, result -> {
+		}, result -> {
 			executor.close();
 			if(result.succeeded()) {
 				promise.resolve((T) result.result());
