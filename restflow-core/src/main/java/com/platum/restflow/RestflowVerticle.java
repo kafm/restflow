@@ -116,7 +116,8 @@ public class RestflowVerticle extends MicroserviceVerticle {
 			      .allowedHeader("Content-Type")
 			      .allowedHeader("Accept")
 			      .allowedHeader("enctype")
-			      .allowedHeader("Authorization"));
+			      .allowedHeader("Authorization")
+			      .allowedHeader("-u")); //TODO MAKE IT POSSIBLE TO ALLOW HEADER BY REQUEST 
 		router.route()
 				.pathRegex(".*(?<!(upload))$")
 				.handler(BodyHandler.create());
