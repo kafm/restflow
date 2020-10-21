@@ -81,7 +81,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		});
 		return promise;
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public Promise<T> get(ResourceMethod method, Params params) {
@@ -90,7 +90,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		executor.executeBlocking(future -> {
 			assertValidMethod(method);
 			T object  = repository.get(method, params);
-			HookInterceptor hook = getHook(HookType.GET, object);
+			HookInterceptor hook = getHook(HookType.GET);
 			if(hook == null) {
 				future.complete(object);
 			} else {
@@ -317,11 +317,18 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 						 	RestflowHttpMethod.DELETE_WITH_ID.value()))
 				 .generateDeleteIfNotFound()
 				 .method();
+		if(id == null) {
+			throw new RestflowInvalidRequestException("Delete object by id with null id it's not allowed");
+		}
 		get(id).success(object -> {
 			delete(method, object)
-			.success(v -> promise.resolve())
+			.success(promise::resolve)
 			.error(promise::reject);
-		}).error(promise::reject);
+		}).error(err -> {
+			delete(method, new Params().addParam("id", id))
+			.success(promise::resolve)
+			.error(promise::reject);
+		});
 		return promise;
 	}
 	
@@ -450,7 +457,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		WorkerExecutor executor = vertx.createSharedWorkerExecutor(WORKER_POOL_NAME);
 		executor.executeBlocking(future -> {
 			T object = objContext.object();
-			HookInterceptor hook = getHook(HookType.DESTROY, object);
+			HookInterceptor hook = getHook(HookType.DESTROY);
 			if(hook == null) {
 				repository.delete(method, object);
 				future.complete();
@@ -506,7 +513,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 			final T object = objContext.object();
 			ResourcePropertyValidator.validate(metadata.resource().getProperties(), 
 					object, metadata.resourceClass(), partial);
-			HookInterceptor hook = getHook(HookType.SAVE, object);
+			HookInterceptor hook = getHook(HookType.SAVE);
 			boolean selfTransaction = this.transaction == null;
 			resolveTransation(hook);
 			if(hook == null) {
@@ -581,7 +588,7 @@ public class ResourceServiceImpl<T> extends AbstractResourceComponent<T> impleme
 		}
 	}
 		
-	private HookInterceptor getHook(HookType hookType, T object) {
+	private HookInterceptor getHook(HookType hookType) {
 		return hooks == null || hookContext ? null : hooks.get(hookType);
 	}
 
