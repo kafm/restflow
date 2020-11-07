@@ -209,7 +209,11 @@ public class ResourceObject extends CaseInsensitiveMap<String, Object> implement
 	
 	@SuppressWarnings("unchecked")
 	public <T> List<T> getList(String name) {
-		return (List<T>) get(name);
+		Object list = get(name);
+		if(list instanceof List) {
+			return (List<T>) get(name);	
+		}
+		return null;
 	}
 
 	public List<ResourceObject> getListOfObjects(String name, ResourceProperty idProperty) {
