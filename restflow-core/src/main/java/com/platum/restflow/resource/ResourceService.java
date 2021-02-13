@@ -41,17 +41,23 @@ public interface ResourceService<T> extends ResourceComponent<T> {
 	
 	Promise<T> insert(ResourceMethod method, T object, Params params);
 	
+	Promise<T> insert(ResourceMethod method, T object, Params params, boolean ignoreValidation);
+	
 	Promise<T> update(T object);
 	
 	Promise<T> update(ResourceMethod method, T object);
 	
 	Promise<T> update(ResourceMethod method, T object, Params params);
 	
+	Promise<T> update(ResourceMethod method, T object, Params params, boolean ignoreValidation);
+	
 	Promise<Void> update(ResourceMethod method, Params params);
 	
 	Promise<T> partialUpdate(ResourceMethod method, T object);
 	
 	Promise<T> partialUpdate(ResourceMethod method, T object, Params params);
+	
+	Promise<T> partialUpdate(ResourceMethod method, T object, Params params, boolean ignoreValidation);
 			
 	<I> Promise<Void> delete(I id);
 	
