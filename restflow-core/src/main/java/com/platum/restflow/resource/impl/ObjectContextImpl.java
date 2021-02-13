@@ -148,7 +148,7 @@ public class ObjectContextImpl<T> implements ObjectContext<T> {
 	
 	@Override
 	public boolean partial() {
-		return this.partial();
+		return partial;
 	}
 	
 	public ObjectContextImpl<T> partial(boolean partial) {
