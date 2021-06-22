@@ -58,7 +58,8 @@ public class RestflowContext {
 	}
 	
 	public String getLangRequestFromRequest(HttpServerRequest request) {
-		return request.getHeader(LOCALE_HEADER);
+		String lang = request.getHeader(LOCALE_HEADER);
+		return StringUtils.isEmpty(lang) ? "en" : lang;
 	}
 	
 	public String getLangMessage(Throwable e, String langRequest) {

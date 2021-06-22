@@ -93,7 +93,6 @@ public class ResourceHttpHelper<T> {
 			throw new RestflowException("Cannot resolve resource service.");
 		}
 		AuthMetadata auth = context.get(AUTH_HEADER);
-		logger.info("HERE AUTH IS: ", auth);
 		service.authorization(auth);
 		return service;
 	}
